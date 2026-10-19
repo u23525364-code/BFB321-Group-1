@@ -1,16 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Title</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HPC Delivery Dashboard - Reports</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <div class="container my-4">
+    <header class="dashboard-card mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <h1 class="h4 m-0 fw-bold">HPC DELIVERY DASHBOARD</h1>
+        <nav aria-label="Main Navigation">
+          <ul class="nav nav-pills">
+            <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="live.html">Live</a></li>
+            <li class="nav-item"><a class="nav-link active" href="reports.html">Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="alerts.html">Alerts</a></li>
+            <li class="nav-item"><a class="nav-link" href="capacity.html">Capacity</a></li>
+            <li class="nav-item"><a class="nav-link" href="gatelog.html">Gate log</a></li>
+          </ul>
+        </nav>
+        <div>
+          <a href="login.html" class="btn btn-outline-secondary btn-sm">Manager · Log out</a>
+        </div>
+      </div>
+    </header>
 
-    <h1>This is a Heading</h1>
-    <p>This is a paragraph.</p>
+    <!-- Filters Bar -->
+    <section class="dashboard-card mb-4">
+      <form class="row g-3 align-items-end">
+        <div class="col-6 col-md-3">
+          <label class="form-label small fw-bold">PERIOD</label>
+          <select class="form-select form-select-sm"><option>Last 30 days</option></select>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label small fw-bold">DRIVER</label>
+          <select class="form-select form-select-sm"><option>All</option></select>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label small fw-bold">ROUTE</label>
+          <select class="form-select form-select-sm"><option>All</option></select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+          <div class="w-100">
+            <label class="form-label small fw-bold">LOCATION</label>
+            <select class="form-select form-select-sm"><option>All</option></select>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-dark mt-auto">Export</button>
+        </div>
+      </form>
+    </section>
 
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-lg-8">
+        <div class="dashboard-card h-100">
+          <h2 class="h6 fw-bold">TAKT COMPLIANCE OVER TIME <span class="fw-normal text-muted small">% of cycles within 90 min</span></h2>
+          <div class="chart-container">
+            <div class="chart-bar" style="height: 65%;" title="Week 1: 65%"></div>
+            <div class="chart-bar" style="height: 60%;" title="Week 2: 60%"></div>
+            <div class="chart-bar" style="height: 75%;" title="Week 3: 75%"></div>
+            <div class="chart-bar" style="height: 70%;" title="Week 4: 70%"></div>
+            <div class="chart-bar" style="height: 80%;" title="Week 5: 80%"></div>
+            <div class="chart-bar" style="height: 78%;" title="Week 6: 78%"></div>
+            <div class="chart-bar" style="height: 88%;" title="Week 7: 88%"></div>
+            <div class="chart-bar" style="height: 82%;" title="Week 8: 82%"></div>
+            <div class="chart-bar" style="height: 85%;" title="Week 9: 85%"></div>
+            <div class="chart-bar" style="height: 80%;" title="Week 10: 80%"></div>
+            <div class="chart-bar" style="height: 83%;" title="Week 11: 83%"></div>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mt-2">
+            <span>week 1</span>
+            <span>week 12</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="dashboard-card h-100">
+          <h2 class="h6 fw-bold border-bottom pb-2">SUMMARY</h2>
+          <div class="d-flex justify-content-between py-1 border-bottom"><span>Total cycles</span><span class="fw-bold">247</span></div>
+          <div class="d-flex justify-content-between py-1 border-bottom"><span>Within takt</span><span class="fw-bold text-success">185 (75%)</span></div>
+          <div class="d-flex justify-content-between py-1 border-bottom"><span>Breached</span><span class="fw-bold text-danger">62 (25%)</span></div>
+          <div class="d-flex justify-content-between py-1 border-bottom"><span>Average cycle time</span><span class="fw-bold">81 min</span></div>
+          <div class="d-flex justify-content-between py-1 border-bottom"><span>Longest cycle</span><span class="fw-bold text-danger">134 min</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="dashboard-card">
+          <h2 class="h6 fw-bold">COMPLIANCE BY DRIVER</h2>
+          <table class="table table-hover align-middle mb-0" id="driverTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable(0, 'driverTable')" class="sortable-header">Driver ↕</th>
+                <th onclick="sortTable(1, 'driverTable')" class="sortable-header">Cycles ↕</th>
+                <th onclick="sortTable(2, 'driverTable')" class="sortable-header">Avg Time ↕</th>
+                <th onclick="sortTable(3, 'driverTable')" class="sortable-header">Within Takt ↕</th>
+                <th onclick="sortTable(4, 'driverTable')" class="sortable-header">Breaches ↕</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="fw-bold">Driver A</td><td>88</td><td>84 min</td><td class="fw-bold">72%</td><td class="text-danger">25</td></tr>
+              <tr><td class="fw-bold">Driver B</td><td>84</td><td>76 min</td><td class="fw-bold">83%</td><td class="text-danger">14</td></tr>
+              <tr><td class="fw-bold">Driver C</td><td>75</td><td>89 min</td><td class="fw-bold">65%</td><td class="text-danger">23</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="dashboard-card">
+          <h2 class="h6 fw-bold">COMPLIANCE BY ROUTE</h2>
+          <table class="table table-hover align-middle mb-0" id="routeTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable(0, 'routeTable')" class="sortable-header">Route ↕</th>
+                <th onclick="sortTable(1, 'routeTable')" class="sortable-header">Cycles ↕</th>
+                <th onclick="sortTable(2, 'routeTable')" class="sortable-header">Avg Time ↕</th>
+                <th onclick="sortTable(3, 'routeTable')" class="sortable-header">Within Takt ↕</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="fw-bold">HPC → Dealership 1</td><td>62</td><td>71 min</td><td class="fw-bold">89%</td></tr>
+              <tr><td class="fw-bold">HPC → Dealership 2</td><td>58</td><td>79 min</td><td class="fw-bold">81%</td></tr>
+              <tr><td class="fw-bold">HPC → Dealership 3</td><td>64</td><td>88 min</td><td class="fw-bold">66%</td></tr>
+              <tr><td class="fw-bold">HPC → Dealership 4</td><td>63</td><td>94 min</td><td class="fw-bold text-danger">58%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer class="explanatory-footer">
+      Filters at the top apply to every panel on the page. Answers which driver, route or time of day accounts for the largest share of breaches.
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function sortTable(columnIndex, tableId) {
+      const table = document.getElementById(tableId);
+      let rows, switching = true, i, x, y, shouldSwitch, dir = "asc", switchcount = 0;
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[columnIndex];
+          y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+          } else if (dir == "desc") {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount++;
+        } else {
+          if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; }
+        }
+      }
+    }
+  </script>
 </body>
 </html>
