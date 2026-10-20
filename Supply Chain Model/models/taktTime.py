@@ -1,10 +1,15 @@
+""""
+taktTime.py serves as a takt time compliance and cycle time calculator for drivers at HPC.
 
-#takt-time.py serves as a takt time compliance and cycle time calculator for drivers at HPC.
-#
-#Key terms: 
-#-Cycle time: the elapsed time of one delivery cycle for a driver, measured from one RFID scan to another. 
-#-Takt time: the maximum time one cycle is allowed to take. HPC takt time is defined as 90 minutes per cycle. 
+Key terms: 
+-Cycle time: the elapsed time of one delivery cycle for a driver, measured from one RFID scan to another. 
+-Takt time: the maximum time one cycle is allowed to take. HPC takt time is defined as 90 minutes per cycle. 
 
+Status Rules: 
+on_track : elapsed time less than a defined fraction (80%) of the takt time.
+at_risk : elapsed time more than 80% of the takt time, possibly might run over time.
+breached : the elapsed time is already greater than takt time.
+"""
 from datetime import datetime
 
 TAKT_TIME_MINUTES = 90.0
@@ -14,6 +19,7 @@ STATUS_ON_TRACK = "on_track"
 STATUS_AT_RISK = "at_risk"
 STATUS_BREACHED = "breached"
 
+"""The Following 3 functions are Value checks to ensure the inputted values down the line are within the correct ranges."""
 
 def check_takt(takt_min):
     if takt_min <= 0:
@@ -27,11 +33,14 @@ def check_elapsed(elapsed_min):
     if elapsed_min < 0: 
         raise ValueError("elapsed_min can not be negative.")
 
-#Core Calculations
+"""The following 5 functions address the core calculations needed in the model."""
 
 def cycle_time_minutes(start: datetime, 
                        end: datetime) -> float: 
+
+    """The time between the start and the end is calculated as the duration of the cycle."""
     duration = end - start
+    """The following checks that the end and start time were inputted in the correct order."""
     if duration.total_seconds() < 0: 
         raise ValueError("end must not be earlier than start.")
 
@@ -39,22 +48,23 @@ def cycle_time_minutes(start: datetime,
 
 def takt_used_percent(elapsed_min: float, 
                       takt_min: float = TAKT_TIME_MINUTES) -> float:
+    
     check_elapsed(elapsed_min)
     check_takt(takt_min)
-   
+    """Simple percentage calculation showing the amout of the takt time used by the cycle"""
     return elapsed_min/ takt_min *100
 
 def minutes_remaining(elapsed_min: float, 
                       takt_min: float = TAKT_TIME_MINUTES) -> float:
     check_elapsed(elapsed_min)
     check_takt(takt_min)
-   
+    """Calculation for how much time out of the takt time is remaining."""
     return takt_min - elapsed_min
 
 def is_breach(elapsed_min: float, takt_min: float = TAKT_TIME_MINUTES) -> bool:
     check_elapsed(elapsed_min)
     check_takt(takt_min)
-
+    """Logical check of whether the cycle time exceeds the takt time."""
     return elapsed_min > takt_min
 
 def classify_status(elapsed_min: float, 
@@ -64,7 +74,7 @@ def classify_status(elapsed_min: float,
     check_elapsed(elapsed_min)
     check_takt(takt_min)
     check_fraction(at_risk_fraction)
-
+    """this function classifies the cycle times according to the defined criteria."""
     at_risk_limit = takt_min * at_risk_fraction
 
     if elapsed_min > takt_min:
@@ -73,7 +83,7 @@ def classify_status(elapsed_min: float,
         return STATUS_AT_RISK
     return STATUS_ON_TRACK
 
-# Aggregate KPI's
+"""These are further support calculations and data display functions"""
 
 def average_cycle_time(cycle_times: list) -> float:
     if len(cycle_times) == 0:
