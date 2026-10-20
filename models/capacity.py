@@ -45,7 +45,7 @@ def drivers_required(daily_deliveries: int,
 
     #Single driver's capacity
     per_driver_capacity=cycles_per_driver_per_day(cycle_minutes, shift_minutes, utilisation)
-    return ceil(daily_deliveries/per_driver_capacity)  #total demand divided by one driver's capacity
+    return ceil(daily_deliveries/per_driver_capacity)  
 
 def daily_capacity(num_drivers: int,            
                    cycle_minutes: float = DEFAULT_CYCLE_MINUTES,
