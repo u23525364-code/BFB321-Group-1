@@ -1,0 +1,16 @@
+{# Reusable UI components. Import with: {% from "partials/macros.html" import status_badge %} #}
+
+{# Status keys come from models/takt_time.py (STATUS_ON_TRACK etc.). #}
+{% set STATUS_STYLES = {
+  "on_track": ("badge-good", "bg-st-good", "On time"),
+  "at_risk":  ("badge-warn", "bg-st-warn", "At risk"),
+  "breached": ("badge-crit", "bg-st-crit", "Breach"),
+  None:       ("badge-none", "bg-st-none", "Idle"),
+} %}
+
+{% macro status_badge(status, label=None) -%}
+  {%- set style = STATUS_STYLES[status] -%}
+  <span class="badge-status {{ style[0] }}">{{ label or style[2] }}</span>
+{%- endmacro %}
+
+{% macro status_bar_class(status) -%}{{ STATUS_STYLES[status][1] }}{%- endmacro %}

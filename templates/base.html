@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   {% block body %}
   <div class="app-shell">
     <!-- Sidebar: static on desktop, off-canvas drawer below 992px -->
@@ -70,12 +71,14 @@
         </div>
       </header>
 
-      <main class="app-content">
+      <main class="app-content" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
       </main>
     </div>
   </div>
   {% endblock %}
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
