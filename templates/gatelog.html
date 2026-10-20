@@ -7,21 +7,22 @@
     <!-- Gate Search Filter -->
     <section class="panel mb-3">
       <div class="panel-body">
-        <form class="row g-3 align-items-end">
+        <form class="row g-3 align-items-end needs-validation" novalidate data-success="Filters applied.">
           <div class="col-6 col-md-3">
             <label class="form-label" for="fDate">Date</label>
-            <input type="text" class="form-control form-control-sm" id="fDate" value="Today">
+            <input type="date" class="form-control form-control-sm" id="fDate" required max="2026-12-31">
+            <div class="invalid-feedback">Choose a date.</div>
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label" for="fGate">Gate</label>
-            <select class="form-select form-select-sm" id="fGate"><option>All</option></select>
+            <select class="form-select form-select-sm" id="fGate"><option>All</option><option>HPC - Lanseria</option><option>Dealership 1</option><option>Dealership 2</option><option>Dealership 3</option><option>Dealership 4</option></select>
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label" for="fDirection">Direction</label>
-            <select class="form-select form-select-sm" id="fDirection"><option>All</option></select>
+            <select class="form-select form-select-sm" id="fDirection"><option>All</option><option>Entry</option><option>Exit</option></select>
           </div>
           <div class="col-6 col-md-3 d-flex gap-2">
-            <button type="button" class="btn btn-sm btn-primary flex-fill"><i class="bi bi-search" aria-hidden="true"></i>Search</button>
+            <button type="submit" class="btn btn-sm btn-primary flex-fill"><i class="bi bi-search" aria-hidden="true"></i>Search</button>
             <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download" aria-hidden="true"></i>Export</button>
           </div>
         </form>
@@ -40,11 +41,11 @@
         <table class="table table-hw table-hover align-middle" id="gateLogTable">
           <thead>
             <tr>
-              <th onclick="sortTable(0, 'gateLogTable')" class="sortable-header">Date</th>
-              <th onclick="sortTable(1, 'gateLogTable')" class="sortable-header">Time</th>
-              <th onclick="sortTable(2, 'gateLogTable')" class="sortable-header">Gate</th>
-              <th onclick="sortTable(3, 'gateLogTable')" class="sortable-header">Direction</th>
-              <th onclick="sortTable(4, 'gateLogTable')" class="sortable-header">Tag ID</th>
+              <th class="sortable-header">Date</th>
+              <th class="sortable-header">Time</th>
+              <th class="sortable-header">Gate</th>
+              <th class="sortable-header">Direction</th>
+              <th class="sortable-header">Tag ID</th>
               <th>Matched to cycle</th>
               <th>Cycle status</th>
             </tr>
@@ -104,7 +105,7 @@
         <span>Showing 1–5 of 1 248</span>
         <nav aria-label="Gate Log Pagination">
           <ul class="pagination pagination-sm mb-0">
-            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item disabled"><a class="page-link" aria-disabled="true">Previous</a></li>
             <li class="page-item active"><a class="page-link" href="#" aria-current="page">1</a></li>
             <li class="page-item"><a class="page-link" href="#">2</a></li>
             <li class="page-item"><a class="page-link" href="#">3</a></li>

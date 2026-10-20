@@ -2,7 +2,7 @@
 {% block title %}Sign in{% endblock %}
 
 {% block body %}
-  <main class="auth-page">
+  <main class="auth-page" id="main-content" tabindex="-1">
     <div class="auth-card">
       <div class="panel">
         <div class="panel-body p-4 p-sm-5">
@@ -23,9 +23,9 @@
 
             <div class="mb-3">
               <label for="password" class="form-label">Password</label>
-              <input type="password" class="form-control" id="password" required autocomplete="current-password">
+              <input type="password" class="form-control" id="password" required minlength="6" autocomplete="current-password">
               <div class="invalid-feedback">
-                Please enter your password.
+                Please enter your password (at least 6 characters).
               </div>
             </div>
 
@@ -48,21 +48,4 @@
       </p>
     </div>
   </main>
-{% endblock %}
-
-{% block scripts %}
-  <script>
-    // Client-side form validation hint
-    (() => {
-      'use strict';
-      const form = document.getElementById('loginForm');
-      form.addEventListener('submit', event => {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    })();
-  </script>
 {% endblock %}

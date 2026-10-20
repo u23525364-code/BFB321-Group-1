@@ -1,127 +1,136 @@
 {% extends "base.html" %}
 {% block title %}Capacity planning{% endblock %}
 {% block page_title %}Capacity planning{% endblock %}
-{% block page_subtitle %}Model current throughput against projected volumes{% endblock %}
+{% block page_subtitle %}Model current driver capacity against projected volumes{% endblock %}
 
 {% block content %}
     <div class="row g-3">
-      <!-- Scenario Calculator Form -->
+      <!-- Scenario inputs. Submitted to Flask, which runs models/capacity.py -->
       <div class="col-12 col-lg-4">
         <section class="panel">
           <header class="panel-header">
             <h2 class="panel-title">Scenario inputs</h2>
           </header>
-          <form id="capacityForm" class="panel-body">
+          <form id="capacityForm" class="panel-body needs-validation" method="get" action="{{ url_for('capacity') }}" novalidate>
             <div class="mb-3">
-              <label class="form-label" for="scenarioName">Scenario name</label>
-              <input type="text" class="form-control" id="scenarioName" value="BYD onboarding">
+              <label class="form-label" for="scenario">Scenario name</label>
+              <input type="text" class="form-control" id="scenario" name="scenario" value="{{ scenario_name }}" maxlength="60">
             </div>
             <div class="row g-3 mb-3">
+              {% for name, (label, kind, default, low, high) in fields.items() %}
+              {% set error = errors.get(name) %}
               <div class="col-6">
-                <label class="form-label" for="inpDeliveries">Deliveries / day</label>
-                <input type="number" id="inpDeliveries" class="form-control" value="16">
+                <label class="form-label" for="inp-{{ name }}">{{ label }}</label>
+                <input type="number" id="inp-{{ name }}" name="{{ name }}"
+                       class="form-control{% if error %} is-invalid{% endif %}"
+                       value="{{ '%g' | format(values[name]) if values[name] is number else values[name] }}" min="{{ low }}" max="{{ high }}"
+                       step="{{ 1 if kind.__name__ == 'int' else 'any' }}" required
+                       aria-describedby="err-{{ name }}">
+                <div class="invalid-feedback" id="err-{{ name }}">{{ error or (label ~ " must be between " ~ low ~ " and " ~ high ~ ".") }}</div>
               </div>
-              <div class="col-6">
-                <label class="form-label" for="inpLocations">Locations</label>
-                <input type="number" id="inpLocations" class="form-control" value="6">
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="inpDrivers">Drivers</label>
-                <input type="number" id="inpDrivers" class="form-control" value="3">
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="inpTrucks">Trucks</label>
-                <input type="number" id="inpTrucks" class="form-control" value="2">
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="inpHours">Hours / day</label>
-                <input type="number" id="inpHours" class="form-control" value="10">
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="inpTakt">Takt target</label>
-                <input type="text" id="inpTakt" class="form-control" value="90 min" disabled>
-              </div>
+              {% endfor %}
             </div>
-            <button type="button" onclick="calculateCapacity()" class="btn btn-primary w-100 mb-2"><i class="bi bi-play-fill" aria-hidden="true"></i>Run scenario</button>
-            <button type="button" class="btn btn-outline-secondary w-100">Compare with current</button>
+            <button type="submit" class="btn btn-primary w-100 mb-2"><i class="bi bi-play-fill" aria-hidden="true"></i>Run scenario</button>
+            <a href="{{ url_for('capacity') }}" class="btn btn-outline-secondary w-100">Reset to defaults</a>
           </form>
         </section>
       </div>
 
-      <!-- Live Dynamic Output Results -->
+      <!-- Results from plan_scenario() -->
       <div class="col-12 col-lg-8 d-flex flex-column gap-3">
         <section class="panel">
           <header class="panel-header">
             <div>
-              <h2 class="panel-title">Results</h2>
+              <h2 class="panel-title">Results{% if scenario_name %} · {{ scenario_name }}{% endif %}</h2>
               <p class="panel-subtitle">Current → projected</p>
             </div>
           </header>
           <div class="panel-body">
+            {% if result %}
+            {% set over = not result.sufficient %}
             <div class="row g-3 mb-3">
               <div class="col-6 col-md-3">
                 <div class="compare-stat">
                   <div class="kpi-title">Deliveries / day</div>
-                  <div class="compare-values"><span class="compare-from">12</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to" id="resDeliveries">16</span></div>
+                  <div class="compare-values"><span class="compare-from">{{ result.baseline_daily }}</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to">{{ result.projected_daily }}</span></div>
                 </div>
               </div>
               <div class="col-6 col-md-3">
                 <div class="compare-stat">
-                  <div class="kpi-title">Cycles / truck</div>
-                  <div class="compare-values"><span class="compare-from">6.0</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to" id="resCycles">8.0</span></div>
+                  <div class="kpi-title">Drivers required</div>
+                  <div class="compare-values"><span class="compare-from">{{ result.baseline_drivers_required }}</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to{% if over %} text-danger{% endif %}">{{ result.drivers_required }}</span></div>
                 </div>
               </div>
               <div class="col-6 col-md-3">
                 <div class="compare-stat">
-                  <div class="kpi-title">Utilisation</div>
-                  <div class="compare-values"><span class="compare-from">81%</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to text-danger" id="resUtil">108%</span></div>
+                  <div class="kpi-title">Fleet load</div>
+                  <div class="compare-values"><span class="compare-from">{{ result.load_percent_current | round | int }}%</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to{% if result.load_percent_current_fleet > result.target_utilisation_percent %} text-danger{% endif %}">{{ result.load_percent_current_fleet | round | int }}%</span></div>
                 </div>
               </div>
               <div class="col-6 col-md-3">
                 <div class="compare-stat">
-                  <div class="kpi-title">Spare capacity</div>
-                  <div class="compare-values"><span class="compare-from">19%</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to text-danger" id="resSpare">-8%</span></div>
+                  <div class="kpi-title">Fleet capacity / day</div>
+                  <div class="compare-values"><span class="compare-to{% if over %} text-danger{% endif %}">{{ result.current_capacity }}</span></div>
                 </div>
               </div>
             </div>
 
-            <div class="alert alert-danger" id="outcomeBox" role="status">
-              <i class="bi bi-exclamation-octagon" id="outcomeIcon" aria-hidden="true"></i>
-              <div><strong id="outcomeLabel">Over capacity.</strong> <span id="outcomeText">Projected demand exceeds current capacity. One additional truck and one additional driver required.</span></div>
+            {% if over %}
+            <div class="alert alert-danger mb-0" role="status">
+              <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+              <div><strong>Over capacity.</strong> {{ result.projected_daily }} deliveries / day exceeds the {{ result.current_capacity }} that {{ result.current_drivers }} driver{{ 's' if result.current_drivers != 1 }} can complete. {{ result.additional_drivers }} additional driver{{ 's' if result.additional_drivers != 1 }} required.</div>
             </div>
+            {% else %}
+            <div class="alert alert-success mb-0" role="status">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+              <div><strong>Within capacity.</strong> {{ result.current_drivers }} driver{{ 's' if result.current_drivers != 1 }} can complete up to {{ result.current_capacity }} deliveries / day, covering the projected {{ result.projected_daily }}.</div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="alert alert-warning mb-0" role="alert">
+              <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+              <div><strong>Check the inputs.</strong> Fix the highlighted fields and run the scenario again.</div>
+            </div>
+            {% endif %}
           </div>
         </section>
 
+        {% if result %}
         <section class="panel">
           <header class="panel-header">
             <div>
-              <h2 class="panel-title">Utilisation per truck</h2>
-              <p class="panel-subtitle">Current vs projected against available hours · dashed line = 100% capacity</p>
+              <h2 class="panel-title">Driver fleet load</h2>
+              <p class="panel-subtitle">Share of total shift time needed for the deliveries · dashed line = {{ result.target_utilisation_percent | round | int }}% target utilisation</p>
             </div>
           </header>
           <div class="panel-body">
             <div class="chart-box">
-              <canvas id="utilChart" aria-label="Truck utilisation, current versus projected" role="img"></canvas>
+              <canvas id="utilChart" role="img"
+                      aria-label="Fleet load: current {{ result.load_percent_current | round | int }} percent, projected {{ result.load_percent_current_fleet | round | int }} percent, target {{ result.target_utilisation_percent | round | int }} percent"></canvas>
             </div>
           </div>
         </section>
+        {% endif %}
       </div>
     </div>
 
     <aside class="design-note">
       <i class="bi bi-info-circle" aria-hidden="true"></i>
-      <p class="mb-0">Inputs on the left can be changed and the scenario re-run whenever volumes, locations or fleet size change.</p>
+      <p class="mb-0">Results are calculated by the standalone model in <code>models/capacity.py</code>: drivers required = ⌈deliveries × cycle time ÷ (shift × utilisation)⌉, rounded up because a partial driver is not possible. Change the inputs and re-run whenever volumes or fleet size change.</p>
     </aside>
 {% endblock %}
 
 {% block scripts %}
+  {% if result %}
   <script>
-    // Dashed reference line at 100% utilisation
-    const capacityLine = {
-      id: 'capacityLine',
+    const target = {{ result.target_utilisation_percent | tojson }};
+
+    // Dashed reference line at the target utilisation
+    const targetLine = {
+      id: 'targetLine',
       afterDatasetsDraw(chart) {
         const { ctx, chartArea: { left, right }, scales: { y } } = chart;
-        const yPos = y.getPixelForValue(100);
+        const yPos = y.getPixelForValue(target);
         ctx.save();
         ctx.strokeStyle = cssVar('--hw-muted');
         ctx.lineWidth = 1.5;
@@ -134,14 +143,17 @@
       }
     };
 
-    const utilChart = new Chart(document.getElementById('utilChart'), {
+    const current = Math.round({{ result.load_percent_current | tojson }});
+    const projected = Math.round({{ result.load_percent_current_fleet | tojson }});
+
+    new Chart(document.getElementById('utilChart'), {
       type: 'bar',
-      plugins: [capacityLine],
+      plugins: [targetLine],
       data: {
-        labels: ['TRK-1'],
+        labels: ['{{ result.current_drivers }} driver{{ "s" if result.current_drivers != 1 }}'],
         datasets: [
-          { label: 'Current', data: [79], backgroundColor: cssVar('--chart-baseline'), borderRadius: 6, maxBarThickness: 64 },
-          { label: 'Projected', data: [105], backgroundColor: cssVar('--chart-1'), borderRadius: 6, maxBarThickness: 64 }
+          { label: 'Current', data: [current], backgroundColor: cssVar('--chart-baseline'), borderRadius: 6, maxBarThickness: 64 },
+          { label: 'Projected', data: [projected], backgroundColor: cssVar(projected > target ? '--chart-2' : '--chart-1'), borderRadius: 6, maxBarThickness: 64 }
         ]
       },
       options: {
@@ -155,42 +167,6 @@
         }
       }
     });
-
-    function calculateCapacity() {
-      const deliveries = parseFloat(document.getElementById('inpDeliveries').value) || 0;
-      const trucks = parseFloat(document.getElementById('inpTrucks').value) || 1;
-
-      const cycles = (deliveries / trucks).toFixed(1);
-      const util = Math.round((deliveries / (trucks * 7.5)) * 100);
-      const spare = 100 - util;
-      const over = util > 100;
-
-      document.getElementById('resDeliveries').innerText = deliveries;
-      document.getElementById('resCycles').innerText = cycles;
-      document.getElementById('resUtil').innerText = util + '%';
-      document.getElementById('resSpare').innerText = spare + '%';
-      document.getElementById('resUtil').classList.toggle('text-danger', over);
-      document.getElementById('resSpare').classList.toggle('text-danger', over);
-
-      const outcomeBox = document.getElementById('outcomeBox');
-      const outcomeIcon = document.getElementById('outcomeIcon');
-      const outcomeLabel = document.getElementById('outcomeLabel');
-      const outcomeText = document.getElementById('outcomeText');
-
-      if (over) {
-        outcomeBox.className = "alert alert-danger";
-        outcomeIcon.className = "bi bi-exclamation-octagon";
-        outcomeLabel.innerText = "Over capacity.";
-        outcomeText.innerText = "Projected demand exceeds current capacity. Additional fleet resources required.";
-      } else {
-        outcomeBox.className = "alert alert-success";
-        outcomeIcon.className = "bi bi-check-circle";
-        outcomeLabel.innerText = "Within capacity.";
-        outcomeText.innerText = "Capacity is sufficient to meet projected demand.";
-      }
-
-      utilChart.data.datasets[1].data = [util];
-      utilChart.update();
-    }
   </script>
+  {% endif %}
 {% endblock %}

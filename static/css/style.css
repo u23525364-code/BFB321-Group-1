@@ -333,8 +333,19 @@ body {
 .cell-primary { font-weight: 600; color: var(--hw-charcoal); }
 .cell-person { display: flex; align-items: center; gap: .625rem; }
 
-.sortable-header { cursor: pointer; user-select: none; }
-.sortable-header::after {
+.sortable-header { user-select: none; }
+.sort-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+.sortable-header.text-end .sort-button { text-align: right; }
+.sort-button::after {
   content: "\F283";                    /* bi-chevron-expand */
   font-family: "bootstrap-icons";
   margin-left: .25rem;
@@ -342,9 +353,9 @@ body {
   vertical-align: -.0625rem;
   opacity: .5;
 }
-.sortable-header[aria-sort="ascending"]::after { content: "\F286"; opacity: 1; }   /* bi-chevron-up */
-.sortable-header[aria-sort="descending"]::after { content: "\F282"; opacity: 1; }  /* bi-chevron-down */
-.sortable-header:hover { color: var(--hw-charcoal); }
+.sortable-header[aria-sort="ascending"] .sort-button::after { content: "\F286"; opacity: 1; }   /* bi-chevron-up */
+.sortable-header[aria-sort="descending"] .sort-button::after { content: "\F282"; opacity: 1; }  /* bi-chevron-down */
+.sort-button:hover { color: var(--hw-charcoal); }
 
 .direction { display: inline-flex; align-items: center; gap: .375rem; font-size: .8125rem; font-weight: 600; color: var(--hw-charcoal); }
 
@@ -547,3 +558,22 @@ a.link-card:hover .link-card-arrow { transform: translateX(3px); color: var(--hw
 .auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1rem; }
 .auth-card { width: 100%; max-width: 26rem; }
 .auth-logo { display: block; height: 4.5rem; width: auto; margin: 0 auto 1.25rem; }
+
+/* ---------- Accessibility & feedback ---------- */
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 1rem;
+  z-index: 1100;
+  padding: .5rem 1rem;
+  border-radius: var(--hw-radius-sm);
+  background-color: var(--hw-charcoal);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus { top: 1rem; color: #fff; }
+#main-content:focus { outline: none; }
+
+.toast { background-color: var(--hw-charcoal); color: #fff; }
+.toast .btn-close { filter: invert(1) grayscale(1) brightness(2); }
