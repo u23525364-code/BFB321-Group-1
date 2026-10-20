@@ -1,126 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HPC Delivery Dashboard - Home</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container my-4">
-    <!-- Shared Top Navbar Component -->
-    <header class="dashboard-card mb-4">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <h1 class="h4 m-0 fw-bold">HPC DELIVERY DASHBOARD</h1>
-        <nav aria-label="Main Navigation">
-          <ul class="nav nav-pills">
-            <li class="nav-item"><a class="nav-link active" href="home.html">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="live.html">Live</a></li>
-            <li class="nav-item"><a class="nav-link" href="reports.html">Reports</a></li>
-            <li class="nav-item"><a class="nav-link" href="alerts.html">Alerts</a></li>
-            <li class="nav-item"><a class="nav-link" href="capacity.html">Capacity</a></li>
-            <li class="nav-item"><a class="nav-link" href="gatelog.html">Gate log</a></li>
-          </ul>
-        </nav>
-        <div>
-          <a href="login.html" class="btn btn-outline-secondary btn-sm">Manager · Log out</a>
-        </div>
-      </div>
-    </header>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block page_title %}Good afternoon{% endblock %}
+{% block page_subtitle %}Monday · 4 HPC locations · 2 trucks · 3 drivers{% endblock %}
 
-    <div class="mb-3">
-      <span class="fw-bold">Good afternoon · Monday, 14:32</span>
-      <span class="text-muted ms-2">4 HPC locations · 2 trucks · 3 drivers</span>
-    </div>
-
-    <!-- Reusable KPI Summary Cards -->
-    <section class="row g-3 mb-4">
-      <div class="col-6 col-md-3">
-        <div class="kpi-card">
-          <div class="kpi-title">Deliveries today</div>
-          <div class="kpi-value">8 / 12</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="kpi-card">
-          <div class="kpi-title">Takt compliance</div>
-          <div class="kpi-value text-warning">75%</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="kpi-card">
-          <div class="kpi-title">Breaches today</div>
-          <div class="kpi-value text-danger">2</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="kpi-card">
-          <div class="kpi-title">Trucks in use</div>
-          <div class="kpi-value">2 / 2</div>
-        </div>
-      </div>
-    </section>
+{% block content %}
+    {% include "partials/kpi_summary.html" %}
 
     <!-- Navigation Hub Cards -->
-    <section class="row g-3">
-      <div class="col-12 col-md-4">
-        <a href="live.html" class="text-decoration-none text-dark">
-          <div class="dashboard-card h-100">
-            <h2 class="h6 fw-bold">Real-time takt dashboard</h2>
-            <p class="small text-muted mb-0">Live countdown for every delivery cycle currently in progress</p>
-          </div>
+    <h2 class="h6 fw-bold text-muted text-uppercase small mb-3">Go to</h2>
+    <section class="row g-3 mb-4">
+      <div class="col-12 col-md-6 col-xl-4">
+        <a href="{{ url_for('live') }}" class="link-card">
+          <span class="link-card-icon"><i class="bi bi-broadcast" aria-hidden="true"></i></span>
+          <span>
+            <span class="link-card-title d-block">Real-time takt dashboard</span>
+            <span class="link-card-text d-block">Live countdown for every delivery cycle currently in progress</span>
+          </span>
+          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="col-12 col-md-4">
-        <a href="reports.html" class="text-decoration-none text-dark">
-          <div class="dashboard-card h-100">
-            <h2 class="h6 fw-bold">Performance reporting</h2>
-            <p class="small text-muted mb-0">Takt compliance by driver, route, location and time period</p>
-          </div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <a href="{{ url_for('reports') }}" class="link-card">
+          <span class="link-card-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
+          <span>
+            <span class="link-card-title d-block">Performance reporting</span>
+            <span class="link-card-text d-block">Takt compliance by driver, route, location and time period</span>
+          </span>
+          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="col-12 col-md-4">
-        <a href="alerts.html" class="text-decoration-none text-dark">
-          <div class="dashboard-card h-100">
-            <h2 class="h6 fw-bold">Breach alerts</h2>
-            <p class="small text-muted mb-0">Cycles that exceeded 90 minutes, awaiting review</p>
-          </div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <a href="{{ url_for('alerts') }}" class="link-card">
+          <span class="link-card-icon"><i class="bi bi-bell" aria-hidden="true"></i></span>
+          <span>
+            <span class="link-card-title d-block">Breach alerts</span>
+            <span class="link-card-text d-block">Cycles that exceeded 90 minutes, awaiting review</span>
+          </span>
+          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="col-12 col-md-4">
-        <a href="capacity.html" class="text-decoration-none text-dark">
-          <div class="dashboard-card h-100">
-            <h2 class="h6 fw-bold">Capacity planning</h2>
-            <p class="small text-muted mb-0">Model current throughput against projected BYD volumes</p>
-          </div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <a href="{{ url_for('capacity') }}" class="link-card">
+          <span class="link-card-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+          <span>
+            <span class="link-card-title d-block">Capacity planning</span>
+            <span class="link-card-text d-block">Model current throughput against projected BYD volumes</span>
+          </span>
+          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="col-12 col-md-4">
-        <a href="gatelog.html" class="text-decoration-none text-dark">
-          <div class="dashboard-card h-100">
-            <h2 class="h6 fw-bold">Gate activity log</h2>
-            <p class="small text-muted mb-0">Auditable record of every RFID scan event</p>
-          </div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <a href="{{ url_for('gatelog') }}" class="link-card">
+          <span class="link-card-icon"><i class="bi bi-upc-scan" aria-hidden="true"></i></span>
+          <span>
+            <span class="link-card-title d-block">Gate activity log</span>
+            <span class="link-card-text d-block">Auditable record of every RFID scan event</span>
+          </span>
+          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="col-12 col-md-4">
-        <div class="dashboard-card h-100">
-          <h2 class="h6 fw-bold">Administration</h2>
-          <p class="small text-muted mb-0">Users, gates, readers and takt time targets</p>
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="link-card">
+          <span class="link-card-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
+          <span>
+            <span class="link-card-title d-block">Administration</span>
+            <span class="link-card-text d-block">Users, gates, readers and takt time targets</span>
+          </span>
         </div>
       </div>
     </section>
 
     <!-- System Status Bar -->
-    <div class="dashboard-card mt-4 py-2 px-3 d-flex flex-wrap justify-content-between align-items-center small">
-      <div><strong>LAST SCAN</strong> 14:31 · HPC gate · EXIT · TRK-002</div>
-      <div class="text-success fw-bold">System status: receiving scan data normally</div>
+    <div class="status-strip">
+      <div><strong>Last scan</strong> · 14:31 · HPC gate · Exit · TRK-002</div>
+      <div class="live-indicator d-inline-flex"><span class="live-dot" aria-hidden="true"></span>System status: receiving scan data normally</div>
     </div>
 
-    <footer class="explanatory-footer">
-      The home page is a navigation hub rather than a working screen. Each tile opens one of the functions described in the solution framework. Summary figures are repeated from the live dashboard so a manager can see the day's position without opening it.
-    </footer>
-  </div>
-</body>
-</html>
+    <aside class="design-note">
+      <i class="bi bi-info-circle" aria-hidden="true"></i>
+      <p class="mb-0">The home page is a navigation hub rather than a working screen. Each tile opens one of the functions described in the solution framework. Summary figures are repeated from the live dashboard so a manager can see the day's position without opening it.</p>
+    </aside>
+{% endblock %}

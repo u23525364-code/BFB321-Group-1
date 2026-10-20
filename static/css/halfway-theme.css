@@ -1,0 +1,37 @@
+/* Halfway Group theme: tokens and Bootstrap 5.3 overrides only.
+   Source of truth: .claude/skills/halfway-dashboard/SKILL.md (section 5). */
+:root {
+  --hw-red:#CF142B; --hw-red-dark:#A30F22; --hw-red-tint:#FBE7E9;
+  --hw-black:#000000; --hw-charcoal:#2F2F2F; --hw-ink:#222222; --hw-muted:#555555;
+  --hw-navy:#162E68; --hw-border:#D3D8DC; --hw-surface:#F6F6F6; --hw-card:#FFFFFF;
+
+  --st-good:#00AE49;  --st-good-text:#007A33;  --st-good-tint:#E6F6EC;
+  --st-warn:#FF8F31;  --st-warn-text:#8A4500;  --st-warn-tint:#FFF1E3;
+  --st-crit:#CF142B;  --st-crit-text:#A30F22;  --st-crit-tint:#FBE7E9;
+  --st-none:#AAAAAA;  --st-none-text:#555555;  --st-none-tint:#EEEEEE;
+
+  --chart-1:#162E68; --chart-2:#CF142B; --chart-3:#6C7A89; --chart-4:#FF8F31; --chart-5:#00AE49;
+  --chart-baseline:#AAAAAA; --chart-grid:#E6E8EA;
+
+  --hw-radius:.75rem; --hw-radius-sm:.5rem;
+  --hw-shadow:0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+
+  /* Bootstrap 5.3 overrides */
+  --bs-body-font-family:"Montserrat", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --bs-body-color:var(--hw-ink);
+  --bs-body-bg:var(--hw-surface);
+  --bs-border-color:var(--hw-border);
+  --bs-link-color-rgb:22,46,104;
+  --bs-link-hover-color-rgb:207,20,43;
+  --bs-primary-rgb:47,47,47;
+  --bs-danger-rgb:207,20,43;
+  --bs-success-rgb:0,122,51;
+  --bs-warning-rgb:255,143,49;
+}
+body { font-size:.9375rem; }
+:focus-visible { outline:3px solid var(--hw-navy); outline-offset:2px; }
+.btn { border-radius:var(--hw-radius-sm); font-weight:600; }
+.btn-primary { --bs-btn-bg:var(--hw-charcoal); --bs-btn-border-color:var(--hw-charcoal);
+  --bs-btn-hover-bg:var(--hw-black); --bs-btn-hover-border-color:var(--hw-black); --bs-btn-active-bg:var(--hw-black); }
+.btn-brand { --bs-btn-color:#fff; --bs-btn-bg:var(--hw-red); --bs-btn-border-color:var(--hw-red);
+  --bs-btn-hover-color:#fff; --bs-btn-hover-bg:var(--hw-red-dark); --bs-btn-hover-border-color:var(--hw-red-dark); }

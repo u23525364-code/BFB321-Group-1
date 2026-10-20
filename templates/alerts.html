@@ -1,95 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HPC Delivery Dashboard - Alerts</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container my-4">
-    <header class="dashboard-card mb-4">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <h1 class="h4 m-0 fw-bold">HPC DELIVERY DASHBOARD</h1>
-        <nav aria-label="Main Navigation">
-          <ul class="nav nav-pills">
-            <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="live.html">Live</a></li>
-            <li class="nav-item"><a class="nav-link" href="reports.html">Reports</a></li>
-            <li class="nav-item"><a class="nav-link active" href="alerts.html">Alerts</a></li>
-            <li class="nav-item"><a class="nav-link" href="capacity.html">Capacity</a></li>
-            <li class="nav-item"><a class="nav-link" href="gatelog.html">Gate log</a></li>
-          </ul>
-        </nav>
-        <div>
-          <a href="login.html" class="btn btn-outline-secondary btn-sm">Manager · Log out</a>
-        </div>
-      </div>
-    </header>
+{% extends "base.html" %}
+{% block title %}Breach alerts{% endblock %}
+{% block page_title %}Breach alerts{% endblock %}
+{% block page_subtitle %}Cycles that exceeded the 90 min takt target{% endblock %}
 
+{% block content %}
     <!-- Sub Navigation -->
-    <div class="mb-3">
-      <button class="btn btn-dark btn-sm">New (4)</button>
-      <button class="btn btn-outline-secondary btn-sm">Acknowledged (6)</button>
-      <button class="btn btn-outline-secondary btn-sm">Resolved (52)</button>
+    <div class="segmented mb-3" role="group" aria-label="Filter alerts">
+      <button type="button" class="btn active" aria-pressed="true">New<span class="count">4</span></button>
+      <button type="button" class="btn" aria-pressed="false">Acknowledged<span class="count">6</span></button>
+      <button type="button" class="btn" aria-pressed="false">Resolved<span class="count">52</span></button>
     </div>
 
     <div class="row g-3">
       <!-- Breaches List -->
-      <div class="col-12 col-lg-8">
-        <div class="dashboard-card">
-          <h2 class="h6 fw-bold border-bottom pb-2 mb-3">BREACHES AWAITING REVIEW <span class="fw-normal text-muted small">newest first</span></h2>
-
-          <!-- Alert Item 1 -->
-          <div class="dashboard-card mb-3 bg-light">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <span class="small text-muted">Today 13:01</span>
-                <h3 class="h6 fw-bold mt-1">Driver A · HPC → Dealership 1</h3>
-                <p class="small text-muted mb-2">Cycle time 101 min · over takt by +11 min</p>
+      <div class="col-12 col-xl-8">
+        <section class="panel">
+          <header class="panel-header">
+            <div>
+              <h2 class="panel-title">Breaches awaiting review</h2>
+              <p class="panel-subtitle">Newest first</p>
+            </div>
+          </header>
+          <div class="panel-body-flush">
+            <!-- Alert Item 1 -->
+            <article class="feed-item">
+              <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
+              <div class="feed-body">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <h3 class="feed-title">Driver A · HPC → Dealership 1</h3>
+                    <div class="feed-meta">Today 13:01 · Cycle time 101 min · over takt by +11 min</div>
+                  </div>
+                  <span class="badge-status badge-crit">Breach</span>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                  <button class="btn btn-sm btn-primary" onclick="this.innerText='Acknowledged'; this.disabled=true;">Acknowledge</button>
+                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
+                </div>
               </div>
-              <span class="badge-status badge-breach">BREACH</span>
-            </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-outline-dark" onclick="this.innerText='Acknowledged'; this.disabled=true;">Acknowledge</button>
-              <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-            </div>
-          </div>
+            </article>
 
-          <!-- Alert Item 2 -->
-          <div class="dashboard-card mb-3 bg-light">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <span class="small text-muted">Today 12:24</span>
-                <h3 class="h6 fw-bold mt-1">Driver B · HPC → Dealership 4</h3>
-                <p class="small text-muted mb-2">Cycle time 94 min · over takt by +4 min</p>
+            <!-- Alert Item 2 -->
+            <article class="feed-item">
+              <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
+              <div class="feed-body">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <h3 class="feed-title">Driver B · HPC → Dealership 4</h3>
+                    <div class="feed-meta">Today 12:24 · Cycle time 94 min · over takt by +4 min</div>
+                  </div>
+                  <span class="badge-status badge-crit">Breach</span>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                  <button class="btn btn-sm btn-primary" onclick="this.innerText='Acknowledged'; this.disabled=true;">Acknowledge</button>
+                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
+                </div>
               </div>
-              <span class="badge-status badge-breach">BREACH</span>
-            </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-outline-dark" onclick="this.innerText='Acknowledged'; this.disabled=true;">Acknowledge</button>
-              <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-            </div>
+            </article>
           </div>
-        </div>
+        </section>
       </div>
 
       <!-- Settings Side Panel -->
-      <div class="col-12 col-lg-4">
-        <div class="dashboard-card mb-3">
-          <h2 class="h6 fw-bold border-bottom pb-2">ALERT SETTINGS</h2>
-          <form class="mt-3">
-            <div class="mb-2">
-              <label class="form-label small fw-bold">TAKT TIME TARGET</label>
-              <input type="text" class="form-control form-control-sm" value="90 minutes">
+      <div class="col-12 col-xl-4 d-flex flex-column gap-3">
+        <section class="panel">
+          <header class="panel-header">
+            <h2 class="panel-title">Alert settings</h2>
+          </header>
+          <form class="panel-body">
+            <div class="mb-3">
+              <label class="form-label" for="taktTarget">Takt time target</label>
+              <input type="text" class="form-control form-control-sm" id="taktTarget" value="90 minutes">
             </div>
-            <div class="mb-2">
-              <label class="form-label small fw-bold">WARN AT</label>
-              <input type="text" class="form-control form-control-sm" value="75 minutes (83%)">
+            <div class="mb-3">
+              <label class="form-label" for="warnAt">Warn at</label>
+              <input type="text" class="form-control form-control-sm" id="warnAt" value="75 minutes (83%)">
             </div>
-            <div class="mb-2">
-              <label class="form-label small fw-bold d-block">NOTIFY BY</label>
+            <div>
+              <span class="form-label d-block">Notify by</span>
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" checked id="c1"><label class="form-check-label small" for="c1">On-screen</label>
               </div>
@@ -98,47 +86,51 @@
               </div>
             </div>
           </form>
-        </div>
+        </section>
 
-        <div class="dashboard-card">
-          <h2 class="h6 fw-bold border-bottom pb-2">BREACHES THIS WEEK <span class="fw-normal text-muted small">by cause</span></h2>
-          <div class="small my-2">
-            <div class="d-flex justify-content-between"><span>Not yet coded</span><span class="fw-bold">8</span></div>
-            <div class="progress my-1" style="height: 6px;"><div class="progress-bar bg-dark" style="width: 80%;"></div></div>
-            <div class="d-flex justify-content-between mt-2"><span>Traffic delay</span><span class="fw-bold">5</span></div>
-            <div class="progress my-1" style="height: 6px;"><div class="progress-bar bg-secondary" style="width: 50%;"></div></div>
+        <section class="panel">
+          <header class="panel-header">
+            <div>
+              <h2 class="panel-title">Breaches this week</h2>
+              <p class="panel-subtitle">By cause</p>
+            </div>
+          </header>
+          <div class="panel-body">
+            <div class="d-flex justify-content-between small"><span>Not yet coded</span><span class="stat-value">8</span></div>
+            <div class="progress progress-xs mt-2 mb-3"><div class="progress-bar bg-chart-1" style="width: 80%;"></div></div>
+            <div class="d-flex justify-content-between small"><span>Traffic delay</span><span class="stat-value">5</span></div>
+            <div class="progress progress-xs mt-2"><div class="progress-bar bg-chart-3" style="width: 50%;"></div></div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
 
     <!-- Reason Code Modal -->
-    <div class="modal fade" id="reasonModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
+    <div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title h6 fw-bold">Assign Exception Reason Code</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <h2 class="modal-title" id="reasonModalLabel">Assign exception reason code</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <select class="form-select mb-3">
+            <label class="form-label" for="reasonCode">Reason code</label>
+            <select class="form-select" id="reasonCode">
               <option>Traffic congestion</option>
               <option>Dealership delay</option>
               <option>HPC loading delay</option>
             </select>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-dark" data-bs-dismiss="modal" onclick="alert('Reason code saved.')">Save</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="alert('Reason code saved.')">Save</button>
           </div>
         </div>
       </div>
     </div>
 
-    <footer class="explanatory-footer">
-      A breach is detected and raised automatically. The only manual input anywhere in the system is the reason code entered here by management after the event.
-    </footer>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <aside class="design-note">
+      <i class="bi bi-info-circle" aria-hidden="true"></i>
+      <p class="mb-0">A breach is detected and raised automatically. The only manual input anywhere in the system is the reason code entered here by management after the event.</p>
+    </aside>
+{% endblock %}
