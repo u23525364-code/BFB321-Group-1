@@ -111,7 +111,7 @@ def test_invalid_inputs_raise():
     with pytest.raises(ValueError):
         tt.classify_status(-1)
     with pytest.raises(ValueError):
-        tt.classify_status(10, takt_minutes=0)
+        tt.classify_status(10, takt_min=0)
     with pytest.raises(ValueError):
         tt.classify_status(10, at_risk_fraction=1.5)
     with pytest.raises(ValueError):
