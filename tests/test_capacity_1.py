@@ -16,7 +16,7 @@ def test_drivers_required_exact_fit():
     # hand calculation: 16*90 = 1440 minutes
     # one driver has 480 minutes 
     # 1440/480 = 3.0 drivers
-    assert cap.drivers_required(16,90.480,1.0) == 3
+    assert cap.drivers_required(16,90,480,1.0) == 3
 
 def test_drivers_required_rounds_up():
     # hand calculation: 1440/(480*0.85) = 3.529 ; rounded up = 4 drivers
@@ -34,7 +34,7 @@ def test_daily_capacity_rounds_down():
 
 def test_load_percent():
     # hand calculation: 13*90=1170 minutes; 3*480=1440 minutes; 1170/1440 = 81.25%
-    assert cap.load_percent(17,3) == pytest.approx(81.25)
+    assert cap.load_percent(13,3) == pytest.approx(81.25)
     # hand calculation: 1530/1440 = 106.25% ; more work than the shift allows
     assert cap.load_percent(17,3) == pytest.approx(106.25)
 
