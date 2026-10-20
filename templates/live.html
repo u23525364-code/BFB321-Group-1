@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Live deliveries{% endblock %}
 {% block page_title %}Live deliveries{% endblock %}
-{% block page_subtitle %}Every delivery cycle in progress, against the 90 min takt target{% endblock %}
+{% block page_subtitle %}Every delivery cycle in progress, against the {{ takt_minutes }} min takt target{% endblock %}
 
 {% block content %}
+    {% from "partials/macros.html" import status_badge, status_bar_class %}
     {% include "partials/kpi_summary.html" %}
 
     <div class="row g-3">
@@ -13,71 +14,50 @@
           <header class="panel-header">
             <div>
               <h2 class="panel-title">Active deliveries</h2>
-              <p class="panel-subtitle">Live countdown against 90 min target</p>
+              <p class="panel-subtitle">Live countdown against {{ takt_minutes }} min target</p>
             </div>
           </header>
           <div class="panel-body-flush table-responsive">
             <table class="table table-hw table-hover align-middle" id="activeDeliveriesTable">
               <thead>
                 <tr>
-                  <th class="sortable-header" onclick="sortTable(0, 'activeDeliveriesTable')">Driver</th>
-                  <th class="sortable-header" onclick="sortTable(1, 'activeDeliveriesTable')">Truck</th>
-                  <th class="sortable-header" onclick="sortTable(2, 'activeDeliveriesTable')">Destination</th>
+                  <th class="sortable-header">Driver</th>
+                  <th class="sortable-header">Truck</th>
+                  <th class="sortable-header">Destination</th>
                   <th>Departed</th>
-                  <th>Elapsed / 90 min</th>
+                  <th>Elapsed / {{ takt_minutes }} min</th>
                   <th>Status</th>
                   <th><span class="visually-hidden">Action</span></th>
                 </tr>
               </thead>
               <tbody>
+                {% for c in cycles %}
                 <tr>
-                  <td><div class="cell-person"><span class="avatar" aria-hidden="true">DA</span><span class="cell-primary">Driver A</span></div></td>
-                  <td>TRK-1</td>
-                  <td>Dealership 2</td>
-                  <td>13:18</td>
-                  <td>
-                    <div class="elapsed">
-                      <div class="progress" role="progressbar" aria-label="Elapsed time" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-st-warn" style="width: 82%;"></div>
-                      </div>
-                      <span class="elapsed-value">74 min</span>
-                    </div>
-                  </td>
-                  <td><span class="badge-status badge-warn">At risk</span></td>
-                  <td class="text-end"><button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exceptionModal">Log exception</button></td>
-                </tr>
-                <tr>
-                  <td><div class="cell-person"><span class="avatar" aria-hidden="true">DB</span><span class="cell-primary">Driver B</span></div></td>
-                  <td>TRK-2</td>
-                  <td>Dealership 4</td>
-                  <td>13:44</td>
-                  <td>
-                    <div class="elapsed">
-                      <div class="progress" role="progressbar" aria-label="Elapsed time" aria-valuenow="53" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-st-good" style="width: 53%;"></div>
-                      </div>
-                      <span class="elapsed-value">48 min</span>
-                    </div>
-                  </td>
-                  <td><span class="badge-status badge-good">On time</span></td>
-                  <td class="text-end"><button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exceptionModal">Log exception</button></td>
-                </tr>
-                <tr>
-                  <td><div class="cell-person"><span class="avatar avatar-muted" aria-hidden="true">DC</span><span class="text-muted">Driver C</span></div></td>
+                  {% if c.status %}
+                  <td><div class="cell-person"><span class="avatar" aria-hidden="true">{{ c.initials }}</span><span class="cell-primary">{{ c.driver }}</span></div></td>
+                  <td>{{ c.truck }}</td>
+                  <td>{{ c.destination }}</td>
+                  <td>{{ c.departed }}</td>
+                  {% else %}
+                  <td><div class="cell-person"><span class="avatar avatar-muted" aria-hidden="true">{{ c.initials }}</span><span class="text-muted">{{ c.driver }}</span></div></td>
                   <td class="text-muted">—</td>
                   <td class="text-muted">Awaiting truck</td>
                   <td class="text-muted">—</td>
+                  {% endif %}
                   <td>
                     <div class="elapsed">
-                      <div class="progress" role="progressbar" aria-label="Elapsed time" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-st-none" style="width: 0%;"></div>
+                      <div class="progress" role="progressbar" aria-label="Takt time used by {{ c.driver }}" aria-valuenow="{{ c.takt_used }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar {{ status_bar_class(c.status) }}" style="width: {{ [c.takt_used, 100] | min }}%;"></div>
                       </div>
-                      <span class="elapsed-value text-muted">—</span>
+                      {% if c.status %}<span class="elapsed-value">{{ c.elapsed }} min</span>{% else %}<span class="elapsed-value text-muted">—</span>{% endif %}
                     </div>
                   </td>
-                  <td><span class="badge-status badge-none">Idle</span></td>
-                  <td class="text-end"><button class="btn btn-sm btn-outline-secondary" disabled>Log exception</button></td>
+                  <td>{{ status_badge(c.status) }}</td>
+                  <td class="text-end"><button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exceptionModal" data-driver="{{ c.driver }}"{% if not c.status %} disabled{% endif %}>Log exception</button></td>
                 </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No delivery cycles in progress.</td></tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
@@ -119,10 +99,10 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h2 class="modal-title" id="exceptionModalLabel">Log delivery exception</h2>
+            <h2 class="modal-title" id="exceptionModalLabel">Log delivery exception<span class="d-block small text-muted fw-normal" id="exceptionDriver"></span></h2>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form id="exceptionForm" class="needs-validation" novalidate>
+          <form id="exceptionForm" class="needs-validation" novalidate data-success="Exception logged.">
             <div class="modal-body">
               <div class="mb-3">
                 <label for="delayReason" class="form-label">Reason code</label>
@@ -137,7 +117,8 @@
               </div>
               <div class="mb-0">
                 <label for="exceptionNotes" class="form-label">Notes / actions taken</label>
-                <textarea class="form-control" id="exceptionNotes" rows="3" placeholder="Provide details..."></textarea>
+                <textarea class="form-control" id="exceptionNotes" rows="3" maxlength="500" aria-describedby="exceptionNotesHelp" placeholder="Provide details..."></textarea>
+                <div class="form-text" id="exceptionNotesHelp">Optional. Up to 500 characters.</div>
               </div>
             </div>
             <div class="modal-footer">
@@ -157,18 +138,10 @@
 
 {% block scripts %}
   <script>
-    // Client-side validation for Exception Modal
-    const exceptionForm = document.getElementById('exceptionForm');
-    exceptionForm.addEventListener('submit', function (event) {
-      if (!exceptionForm.checkValidity()) {
-        event.preventDefault();
-        event.stopPropagation();
-      } else {
-        event.preventDefault();
-        alert("Exception logged successfully!");
-        bootstrap.Modal.getInstance(document.getElementById('exceptionModal')).hide();
-      }
-      exceptionForm.classList.add('was-validated');
+    // Show which driver the exception is for. Validation and the success
+    // message are handled by the shared .needs-validation code in dashboard.js.
+    document.getElementById('exceptionModal').addEventListener('show.bs.modal', event => {
+      document.getElementById('exceptionDriver').textContent = event.relatedTarget?.dataset.driver || '';
     });
   </script>
 {% endblock %}

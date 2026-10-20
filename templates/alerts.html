@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Breach alerts{% endblock %}
 {% block page_title %}Breach alerts{% endblock %}
-{% block page_subtitle %}Cycles that exceeded the 90 min takt target{% endblock %}
+{% block page_subtitle %}Cycles that exceeded the {{ takt_minutes }} min takt target{% endblock %}
 
 {% block content %}
     <!-- Sub Navigation -->
@@ -34,8 +34,8 @@
                   <span class="badge-status badge-crit">Breach</span>
                 </div>
                 <div class="d-flex gap-2 mt-3">
-                  <button class="btn btn-sm btn-primary" onclick="this.innerText='Acknowledged'; this.disabled=true;">Acknowledge</button>
-                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
+                  <button type="button" class="btn btn-sm btn-primary" data-acknowledge>Acknowledge</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
                 </div>
               </div>
             </article>
@@ -52,8 +52,8 @@
                   <span class="badge-status badge-crit">Breach</span>
                 </div>
                 <div class="d-flex gap-2 mt-3">
-                  <button class="btn btn-sm btn-primary" onclick="this.innerText='Acknowledged'; this.disabled=true;">Acknowledge</button>
-                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
+                  <button type="button" class="btn btn-sm btn-primary" data-acknowledge>Acknowledge</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
                 </div>
               </div>
             </article>
@@ -67,24 +67,30 @@
           <header class="panel-header">
             <h2 class="panel-title">Alert settings</h2>
           </header>
-          <form class="panel-body">
-            <div class="mb-3">
-              <label class="form-label" for="taktTarget">Takt time target</label>
-              <input type="text" class="form-control form-control-sm" id="taktTarget" value="90 minutes">
+          <form class="panel-body needs-validation" novalidate data-success="Alert settings saved.">
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label" for="taktTarget">Takt target (min)</label>
+                <input type="number" class="form-control form-control-sm" id="taktTarget" value="{{ takt_minutes }}" min="1" max="600" step="1" required>
+                <div class="invalid-feedback">Enter 1 to 600 minutes.</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="warnAt">Warn at (% of takt)</label>
+                <input type="number" class="form-control form-control-sm" id="warnAt" value="{{ (at_risk_fraction * 100) | int }}" min="1" max="99" step="1" required aria-describedby="warnAtHelp">
+                <div class="invalid-feedback">Enter 1 to 99%.</div>
+              </div>
+              <div class="col-12 form-text mt-1" id="warnAtHelp">A cycle shows as "At risk" once it has used this share of the takt time.</div>
             </div>
-            <div class="mb-3">
-              <label class="form-label" for="warnAt">Warn at</label>
-              <input type="text" class="form-control form-control-sm" id="warnAt" value="75 minutes (83%)">
-            </div>
-            <div>
-              <span class="form-label d-block">Notify by</span>
+            <fieldset class="mb-3">
+              <legend class="form-label fs-6">Notify by</legend>
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" checked id="c1"><label class="form-check-label small" for="c1">On-screen</label>
               </div>
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" checked id="c2"><label class="form-check-label small" for="c2">Email</label>
               </div>
-            </div>
+            </fieldset>
+            <button type="submit" class="btn btn-sm btn-primary w-100">Save settings</button>
           </form>
         </section>
 
@@ -113,18 +119,23 @@
             <h2 class="modal-title" id="reasonModalLabel">Assign exception reason code</h2>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <label class="form-label" for="reasonCode">Reason code</label>
-            <select class="form-select" id="reasonCode">
-              <option>Traffic congestion</option>
-              <option>Dealership delay</option>
-              <option>HPC loading delay</option>
-            </select>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="alert('Reason code saved.')">Save</button>
-          </div>
+          <form class="needs-validation" novalidate data-success="Reason code saved.">
+            <div class="modal-body">
+              <label class="form-label" for="reasonCode">Reason code</label>
+              <select class="form-select" id="reasonCode" required>
+                <option value="" selected disabled>Select a reason code...</option>
+                <option value="traffic">Traffic congestion</option>
+                <option value="dealership_wait">Dealership delay</option>
+                <option value="hpc_loading">HPC loading delay</option>
+                <option value="weather">Weather conditions</option>
+              </select>
+              <div class="invalid-feedback">Please select a reason code.</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -133,4 +144,16 @@
       <i class="bi bi-info-circle" aria-hidden="true"></i>
       <p class="mb-0">A breach is detected and raised automatically. The only manual input anywhere in the system is the reason code entered here by management after the event.</p>
     </aside>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    document.querySelectorAll('[data-acknowledge]').forEach(button => {
+      button.addEventListener('click', () => {
+        button.textContent = 'Acknowledged';
+        button.disabled = true;
+        showToast('Breach acknowledged.');
+      });
+    });
+  </script>
 {% endblock %}
