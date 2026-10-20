@@ -15,23 +15,30 @@ def validate(cycle_minutes, shift_minutes, utilisation):
         raise ValueError("utilisation must be between 0 and 1")
 
 def ceil(value):
+    """round up, ignoring tiny floating point noise. for example 3.00000000000000004 should give 3 and not 4 """
     return math.ceil(round(value,9))            
 
 def floor(value):
+    """round down, ignoring tiny floating point noise.""""
     return math.floor(round(value,9))
 
 #Capacacity calculations
 def cycles_per_driver_per_day(cycle_minutes: float=default_cycle_minutes,
                               shift_minutes: float=default_shift_minutes,
                               utilisation: float=default_utilisation):
+    """define how many delivery cycles one driver can do in a day. 
+       formula: (shift minutes * utilisation)/cycle minutes""""
     validate(cycle_minutes, shift_minutes, utilisation)
     productive_minutes=shift_minutes * utilisation
     return productive_minutes/cycle_minutes
 
-def drivers_required(daily_deliveries: int,                     #Minimum number of drivers needed for delivery volume
+def drivers_required(daily_deliveries: int,                     
                      cycle_minutes: float=default_cycle_minutes,
                      shift_minutes: float=default_shift_minutes,
                      utilisation: float=default_utilisation):
+    """define how many drivers are needed to complete the daily delivery volume.
+       formula: daily deliveries / (shift minutes * utilisation)/cycle minutes
+       Rounded up because you cannot have a fraction of a driver."""
     validate(cycle_minutes, shift_minutes, utilisation)
     if daily_deliveries<0:
         raise ValueError("daily deliveries must be more than 0")
@@ -40,22 +47,29 @@ def drivers_required(daily_deliveries: int,                     #Minimum number 
     per_driver_capacity=cycles_per_driver_per_day(cycle_minutes, shift_minutes, utilisation)
     return ceil(daily_deliveries/per_driver_capacity)  #total demand divided by one driver's capacity
 
-def daily_capacity(num_drivers: int,            #max number of deliveries the drivers can complete in a day)
+def daily_capacity(num_drivers: int,            
                    cycle_minutes: float = default_cycle_minutes,
                    shift_minutes: float = default_shift_minutes,
                    utilisation: float = default_utilisation):
+    """max number of deliveries the drivers can complete daily
+    formula: floor(num_drivers * (shift_minutes * utilisation)/cycle_minutes)
+    Rounded down because only whole deliveries count.""""
 
     validate(cycle_minutes, shift_minutes, utilisation)
     if num_drivers<0:
         raise ValueError("number of drivers must be more than 0")
 
     per_driver_capacity=cycles_per_driver_per_day(cycle_minutes, shift_minutes, utilisation)
-    return floor(num_drivers*per_driver_capacity) #total capacity is number of drivers multiplied by one driver's capacity
+    return floor(num_drivers*per_driver_capacity) 
 
-def load_percent(daily_deliveries: int,            #how busy drivers are as a percentage of their shift time
+def load_percent(daily_deliveries: int,            
                  num_drivers: int,
                  cycle_minutes: float = default_cycle_minutes,
                  shift_minutes: float = default_shift_minutes):
+     """How busy the drivers are as a percentage of their shift time.
+     Formula: (daily_deliveries * cycle_minutes)/(num_drivers*shift_minutes)*100)
+     Compare it with the target utilisation (default is 85%). Above the target means the fleet is strechted
+     """
      if cycle_minutes<=0 or shift_minutes<=0:
          raise ValueError("cycle and shift must be more than 0")
      if daily_deliveries<0:
@@ -72,7 +86,10 @@ def capacity_gap(daily_deliveries: int,
                  cycle_minutes: float = default_cycle_minutes,
                  shift_minutes: float = default_shift_minutes,
                  utilisation: float = default_utilisation):
- #How many extra drivers are needed or how many spare drivers that are not needed
+    """How many extra drivers are needed (positive) or how many spare drivers that are not needed (negative)
+    formula: drivers_required - drivers_current
+    Rounded up because you cannot have a fraction of a driver."""
+
     if current_drivers<0:
         raise ValueError("current drivers must be more than 0")
     needed = drivers_required(daily_deliveries, cycle_minutes, shift_minutes, utilisation)
@@ -81,9 +98,10 @@ def capacity_gap(daily_deliveries: int,
 
 #Scenario planning for the BYD volume increase
 def projected_volume(baseline_daily: int, uplift_percent: float):
-    #daily deliveries after volume increases by a percentage
-    #Rounded up so the plan is not under-sized
-    #A negative uplift models a reduction in volume, but cannot be more than 100% (which would be negative deliveries)
+    """daily deliveries after volume increases by a percentage
+        formula: ceil(baseline_daily*(1+uplift_percent/100))
+        Rounded up so the plan is not under-sized
+        A negative uplift models a reduction in volume, but cannot be more than 100% (which would be negative deliveries)"""
     if baseline_daily<0:
         raise ValueError("baseline daily deliveries must be more than 0")
     if uplift_percent<-100:
@@ -96,6 +114,11 @@ def plan_scenario(baseline_daily: int,
                   cycle_minutes:float=default_cycle_minutes,
                   shift_minutes:float=default_shift_minutes,
                   utilisation:float=default_utilisation):
+    """ Compare todays capacity with the projected volume after a percentage increase in deliveries.
+            Returns a dict the capacity planning page can display:
+            baseline_daily, projected_daily, current_drivers,
+            current_capacity, drivers_required, additional_drivers,
+            load_percent_current_fleet, target_utilisation_percent, sufficien"""
     #step1: what volume is expected after the uplift?
     projected=projected_volume(baseline_daily, uplift_percent)
     #step2: how many drivers are needed for that volume?
