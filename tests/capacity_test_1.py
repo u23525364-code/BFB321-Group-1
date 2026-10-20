@@ -50,3 +50,38 @@ def test_projected_volume():
     # hand calculation: no chamge in volume scenario
     assert cap.projected_volume(13,0) == 13
 
+def test_plan_scenario_byd_growth():
+    # hand calculation: baseline=13/day; 30% increase in volume; 3 current drivers
+    # projected = ceil(16.9) = 17
+    # needed = ceil(17*90/408) = 4
+    # current.capacity = floor(3*4.5333) = 13
+    # additional = 4-3=1
+    # load on current drivers = 1530/1440 = 106.25%
+    # sufficient=17 and current is 13 thus insufficient (false) 
+    r = cap.plan_scenario(13,30,3)
+    assert r["projected_daily"] == 17
+    assert r["drivers_required"] == 4
+    assert r["current_capacity"] == 13
+    assert r["additional_drivers"] == 1
+    assert r["load_percent_current_fleet"] == pytest.approx(106.25)
+    assert r["sufficient"] is False
+
+def test_plan_scenario_no_extra_drivers_needed():
+    # hand calculation: 10/day; 0% volume increase; 3 drivers; capacity=13 which is more than 10 thus sufficient(True); 0 extra
+    r = cap.plan_scenario(10,0,3)
+    assert r["sufficient"] is True
+    assert r["additional_drivers"] == 0
+
+def test_invalid_inputs():
+    with pytest.raises(ValueError):
+        cap.drivers_required(-1)
+    with pytest.raises(ValueError):
+        cap.drivers_required(10, cycle_minutes=0)
+    with pytest.raises(ValueError):
+        cap.drivers_required(10, utilisation=0)
+    with pytest.raises(ValueError):
+        cap.drivers_required(10, utilisation=1.2)
+    with pytest.raises(ValueError):
+        cap.daily_capacity(-1)
+    with pytest.raises(ValueError):
+        cap.projected_volume(10, -150)
