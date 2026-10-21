@@ -1,5 +1,10 @@
-/* Shared HPC dashboard components.
-   Every colour, radius and shadow comes from halfway-theme.css; no hex codes here. */
+/* Shared HPC dashboard styles.
+   Every colour, radius and shadow comes from halfway-theme.css; no hex codes here.
+
+   The pages are built from Bootstrap 5 components (navbar, nav, offcanvas, card, badge,
+   list-group, table, form, modal, alert, progress, pagination, toast). This file only
+   themes them, plus a few small helpers Bootstrap does not provide (KPI figures, avatar,
+   link tiles, segmented tabs). */
 
 /* ---------- Bootstrap remaps not covered by the theme file ---------- */
 :root {
@@ -7,6 +12,15 @@
   --bs-light-rgb: 246,246,246;   /* --hw-surface */
   --bs-dark-rgb: 47,47,47;       /* --hw-charcoal */
   --bs-heading-color: var(--hw-charcoal);
+  --bs-code-color: var(--hw-navy);   /* Bootstrap's default pink fails contrast on the grey page */
+
+  /* Status colours for badges, alerts and progress bars.
+     Fills use the bright status colour; text uses the darker "Text" shade (readable on white). */
+  --bs-success-rgb: 0,174,73;                     /* --st-good fill */
+  --bs-success-bg-subtle: var(--st-good-tint);    --bs-success-text-emphasis: var(--st-good-text);
+  --bs-warning-bg-subtle: var(--st-warn-tint);    --bs-warning-text-emphasis: var(--st-warn-text);
+  --bs-danger-bg-subtle: var(--st-crit-tint);     --bs-danger-text-emphasis: var(--st-crit-text);
+  --bs-secondary-bg-subtle: var(--st-none-tint);  --bs-secondary-text-emphasis: var(--st-none-text);
 
   --sidebar-w: 16rem;
   --on-dark: rgba(255,255,255,.78);
@@ -26,7 +40,7 @@ body {
 
 .tabular { font-variant-numeric: tabular-nums; }
 
-/* ---------- App shell ---------- */
+/* ---------- App shell: offcanvas sidebar + navbar ---------- */
 .app-shell { display: flex; min-height: 100vh; }
 
 .app-sidebar {
@@ -81,21 +95,25 @@ body {
   text-transform: uppercase;
   color: var(--on-dark-muted);
 }
+
+/* Bootstrap .nav / .nav-link, themed for the dark sidebar */
+.app-sidebar .nav {
+  --bs-nav-link-color: var(--on-dark);
+  --bs-nav-link-hover-color: var(--hw-card);
+  --bs-nav-link-padding-x: .75rem;
+  --bs-nav-link-padding-y: .625rem;
+}
 .sidebar-link {
   position: relative;
   display: flex;
   align-items: center;
   gap: .75rem;
-  padding: .625rem .75rem;
   margin-bottom: .125rem;
   border-radius: var(--hw-radius-sm);
-  color: var(--on-dark);
   font-weight: 500;
-  text-decoration: none;
-  transition: background-color .15s ease, color .15s ease;
 }
 .sidebar-link .bi { font-size: 1.0625rem; }
-.sidebar-link:hover { background-color: rgba(255,255,255,.06); color: var(--hw-card); }
+.sidebar-link:hover { background-color: rgba(255,255,255,.06); }
 .sidebar-link.active { background-color: rgba(255,255,255,.1); color: var(--hw-card); font-weight: 600; }
 .sidebar-link.active::before {
   content: "";
@@ -107,15 +125,15 @@ body {
   border-radius: 0 3px 3px 0;
   background-color: var(--hw-red);
 }
-.sidebar-count {
-  margin-left: auto;
-  padding: .125rem .5rem;
-  border-radius: 50rem;
-  background-color: var(--hw-red);
-  color: var(--hw-card);
-  font-size: .6875rem;
-  font-weight: 700;
+.sidebar-link .badge {
+  --bs-badge-padding-x: .5rem;
+  --bs-badge-padding-y: .125rem;
+  --bs-badge-font-size: .6875rem;
+  --bs-badge-font-weight: 700;
 }
+/* The theme's navy focus ring is invisible on charcoal, so use white inside the sidebar */
+.app-sidebar a:focus-visible,
+.app-sidebar button:focus-visible { outline: 3px solid var(--hw-card); outline-offset: 2px; box-shadow: none; }
 
 .sidebar-footer {
   display: flex;
@@ -139,18 +157,19 @@ body {
 
 .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
+/* Top bar: Bootstrap .navbar */
 .app-topbar {
   position: sticky;
   top: 0;
   z-index: 1020;
-  display: flex;
-  align-items: center;
+  flex-wrap: nowrap;
   gap: 1rem;
   min-height: 4.5rem;
   padding: .75rem 2rem;
   background-color: var(--hw-card);
   border-bottom: 1px solid var(--hw-border);
 }
+.app-topbar .navbar-toggler { margin-left: -.75rem; }
 .topbar-heading { min-width: 0; }
 .page-title { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; color: var(--hw-charcoal); }
 .page-subtitle { margin: 0; font-size: .8125rem; color: var(--hw-muted); }
@@ -175,17 +194,9 @@ body {
 .app-content { width: 100%; max-width: 90rem; padding: 2rem; }
 @media (max-width: 575.98px) {
   .app-topbar { padding: .75rem 1rem; }
+  .app-topbar .navbar-toggler { margin-left: -.5rem; }
   .app-content { padding: 1rem; }
   .page-title { font-size: 1.25rem; }
-}
-
-.btn-icon {
-  --bs-btn-padding-x: .5rem;
-  --bs-btn-padding-y: .25rem;
-  --bs-btn-color: var(--hw-charcoal);
-  --bs-btn-hover-bg: var(--hw-surface);
-  font-size: 1.375rem;
-  line-height: 1;
 }
 
 .avatar {
@@ -205,52 +216,41 @@ body {
 .avatar-dark { background-color: rgba(255,255,255,.12); border-color: transparent; color: var(--hw-card); font-size: .8125rem; }
 .avatar-muted { color: var(--hw-muted); }
 
-/* ---------- Panels (cards) ---------- */
-.panel {
-  display: flex;
-  flex-direction: column;
+/* ---------- Cards: Bootstrap .card, themed ---------- */
+.card {
+  --bs-card-bg: var(--hw-card);
+  --bs-card-border-color: var(--hw-border);
+  --bs-card-border-radius: var(--hw-radius);
+  --bs-card-cap-bg: transparent;
+  --bs-card-cap-padding-x: 1.25rem;
+  --bs-card-cap-padding-y: 1.125rem;
+  --bs-card-spacer-x: 1.25rem;
+  --bs-card-spacer-y: 1.25rem;
   overflow: hidden;
-  background-color: var(--hw-card);
-  border: 1px solid var(--hw-border);
-  border-radius: var(--hw-radius);
   box-shadow: var(--hw-shadow);
 }
-.panel-header {
+.card-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: .75rem 1rem;
-  padding: 1.125rem 1.25rem;
-  border-bottom: 1px solid var(--hw-border);
 }
-.panel-title { margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--hw-charcoal); }
-.panel-subtitle { margin: .125rem 0 0; font-size: .8125rem; color: var(--hw-muted); }
-.panel-body { flex: 1; padding: 1.25rem; }
-.panel-body-flush { flex: 1; }
-.panel-footer {
+.card-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: .75rem;
-  padding: .75rem 1.25rem;
-  border-top: 1px solid var(--hw-border);
+  padding-top: .75rem;
+  padding-bottom: .75rem;
   font-size: .8125rem;
   color: var(--hw-muted);
 }
+.card-title { margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--hw-charcoal); }
+.card-subtitle { margin: .125rem 0 0; font-size: .8125rem; font-weight: 400; color: var(--hw-muted); }
 
-/* ---------- KPI cards ---------- */
-.kpi-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 1.25rem;
-  background-color: var(--hw-card);
-  border: 1px solid var(--hw-border);
-  border-radius: var(--hw-radius);
-  box-shadow: var(--hw-shadow);
-}
+/* ---------- KPI figures (inside a .card-body) ---------- */
 .kpi-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
 .kpi-title { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--hw-muted); }
 .kpi-icon {
@@ -285,31 +285,35 @@ body {
 }
 .kpi-meta a { font-weight: 600; text-decoration: none; }
 
-/* ---------- Status pills: always carry a text label ---------- */
-.badge-status {
+/* ---------- Status badges: Bootstrap .badge, always with a text label ---------- */
+.badge {
+  --bs-badge-padding-x: .625rem;
+  --bs-badge-padding-y: .25rem;
+  --bs-badge-font-size: .75rem;
+  --bs-badge-font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: .375rem;
-  padding: .25rem .625rem;
-  border-radius: 50rem;
-  font-size: .75rem;
-  font-weight: 600;
   line-height: 1.2;
-  white-space: nowrap;
 }
-.badge-status::before {
+.badge-dot::before {
   content: "";
+  flex-shrink: 0;
   width: .375rem;
   height: .375rem;
+  margin-right: .375rem;
   border-radius: 50%;
-  background-color: var(--dot);
+  background-color: var(--dot, currentColor);
 }
-.badge-good { --dot: var(--st-good); background-color: var(--st-good-tint); color: var(--st-good-text); }
-.badge-warn { --dot: var(--st-warn); background-color: var(--st-warn-tint); color: var(--st-warn-text); }
-.badge-crit { --dot: var(--st-crit); background-color: var(--st-crit-tint); color: var(--st-crit-text); }
-.badge-none { --dot: var(--st-none); background-color: var(--st-none-tint); color: var(--st-none-text); }
+.badge.bg-success-subtle   { --dot: var(--st-good); }
+.badge.bg-warning-subtle   { --dot: var(--st-warn); }
+.badge.bg-danger-subtle    { --dot: var(--st-crit); }
+.badge.bg-secondary-subtle { --dot: var(--st-none); }
 
-/* ---------- Tables ---------- */
+/* ---------- Tables: Bootstrap .table, compact variant ---------- */
+/* Keeps visually-hidden captions and headers inside the scroll box instead of
+   widening the page on narrow screens. */
+.table-responsive { position: relative; }
+
 .table-hw {
   --bs-table-hover-bg: var(--hw-surface);
   margin-bottom: 0;
@@ -369,19 +373,16 @@ body {
   --bs-pagination-focus-box-shadow: none;
   --bs-pagination-border-radius: var(--hw-radius-sm);
 }
+.pagination .page-link { min-width: 1.75rem; text-align: center; }   /* touch target of at least 24px */
 
-/* ---------- Progress & elapsed-time bars ---------- */
+/* ---------- Progress & elapsed-time bars: Bootstrap .progress ---------- */
 .progress { --bs-progress-bg: var(--chart-grid); --bs-progress-border-radius: 50rem; height: .5rem; }
 .progress-xs { height: .375rem; }
 .elapsed { display: flex; align-items: center; gap: .75rem; min-width: 11rem; }
 .elapsed .progress { flex: 1; }
 .elapsed-value { width: 3.75rem; font-size: .8125rem; font-weight: 600; text-align: right; color: var(--hw-charcoal); white-space: nowrap; }
 
-/* Status and chart fills (shapes only) */
-.bg-st-good { background-color: var(--st-good) !important; }
-.bg-st-warn { background-color: var(--st-warn) !important; }
-.bg-st-crit { background-color: var(--st-crit) !important; }
-.bg-st-none { background-color: var(--st-none) !important; }
+/* Chart fills (shapes only; status fills use Bootstrap's bg-success / bg-warning / bg-danger) */
 .bg-chart-1 { background-color: var(--chart-1) !important; }
 .bg-chart-2 { background-color: var(--chart-2) !important; }
 .bg-chart-3 { background-color: var(--chart-3) !important; }
@@ -391,14 +392,13 @@ body {
 
 .chart-box { position: relative; height: 17rem; }
 
-/* ---------- Feeds (alert lists) ---------- */
-.feed-item {
-  display: flex;
-  gap: .875rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--hw-border);
+/* ---------- Feeds (alert lists): Bootstrap .list-group ---------- */
+.list-group {
+  --bs-list-group-bg: var(--hw-card);
+  --bs-list-group-border-color: var(--hw-border);
+  --bs-list-group-item-padding-x: 1.25rem;
+  --bs-list-group-item-padding-y: 1rem;
 }
-.feed-item:last-child { border-bottom: 0; }
 .feed-icon {
   display: inline-flex;
   align-items: center;
@@ -410,6 +410,8 @@ body {
   background-color: var(--st-crit-tint);
   color: var(--st-crit-text);
 }
+.feed-icon-ok { background-color: var(--st-good-tint); color: var(--st-good-text); }
+.feed-icon-none { background-color: var(--st-none-tint); color: var(--st-none-text); }
 .feed-body { flex: 1; min-width: 0; }
 .feed-title { margin: 0; font-size: .9375rem; font-weight: 600; color: var(--hw-charcoal); }
 .feed-meta { font-size: .8125rem; color: var(--hw-muted); }
@@ -435,21 +437,8 @@ body {
 .compare-arrow { font-size: .875rem; color: var(--hw-muted); }
 .compare-to { font-size: 1.375rem; font-weight: 700; color: var(--hw-charcoal); }
 
-/* ---------- Home quick links ---------- */
-.link-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  height: 100%;
-  padding: 1.25rem;
-  background-color: var(--hw-card);
-  border: 1px solid var(--hw-border);
-  border-radius: var(--hw-radius);
-  box-shadow: var(--hw-shadow);
-  color: inherit;
-  text-decoration: none;
-  transition: border-color .15s ease, box-shadow .15s ease;
-}
+/* ---------- Home quick links: a clickable .card ---------- */
+.link-card { color: inherit; transition: border-color .15s ease, box-shadow .15s ease; }
 a.link-card:hover { border-color: var(--hw-charcoal); box-shadow: 0 4px 16px rgba(0,0,0,.08); color: inherit; }
 .link-card-icon {
   display: inline-flex;
@@ -483,7 +472,7 @@ a.link-card:hover .link-card-arrow { transform: translateX(3px); color: var(--hw
 }
 .status-strip strong { color: var(--hw-charcoal); }
 
-/* ---------- Segmented control (alert tabs) ---------- */
+/* ---------- Segmented tabs (Bootstrap tab plugin on .btn) ---------- */
 .segmented {
   display: inline-flex;
   gap: .25rem;
@@ -504,7 +493,7 @@ a.link-card:hover .link-card-arrow { transform: translateX(3px); color: var(--hw
   border-radius: .375rem;
 }
 .segmented .btn.active { background-color: var(--hw-charcoal); color: var(--hw-card); }
-.segmented .count { margin-left: .375rem; opacity: .7; }
+.segmented .count { margin-left: .375rem; opacity: .85; }
 
 /* ---------- Buttons & forms ---------- */
 .btn-outline-secondary {
@@ -529,6 +518,7 @@ a.link-card:hover .link-card-arrow { transform: translateX(3px); color: var(--hw
 .form-control:disabled { background-color: var(--hw-surface); }
 .form-check-input:checked { background-color: var(--hw-charcoal); border-color: var(--hw-charcoal); }
 .form-check-input:focus { border-color: var(--hw-navy); box-shadow: none; }
+.form-text { font-size: .75rem; }
 
 /* ---------- Alerts & modals ---------- */
 .alert { display: flex; gap: .75rem; align-items: flex-start; margin-bottom: 0; border-radius: var(--hw-radius-sm); }
