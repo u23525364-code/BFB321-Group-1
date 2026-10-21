@@ -16,7 +16,7 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="app-shell">
-    <!-- Sidebar: fixed on desktop, off-canvas drawer below 992px -->
+
     <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Sidebar">
       <div class="sidebar-inner">
         <div class="sidebar-brand">
@@ -103,7 +103,7 @@
       </header>
 
       <main class="app-content" id="main-content" tabindex="-1">
-        <!-- Today's headline KPIs -->
+
         <section class="row g-3 mb-4" aria-label="Today's summary">
           <div class="col-6 col-xl-3">
             <div class="card h-100">
@@ -162,7 +162,7 @@
         </section>
 
         <div class="row g-3">
-          <!-- Active deliveries: sortable table, with a modal to log an exception -->
+
           <div class="col-12">
             <section class="card">
               <header class="card-header">
@@ -240,7 +240,6 @@
             </section>
           </div>
 
-          <!-- Breach alerts widget -->
           <div class="col-12">
             <section class="card">
               <header class="card-header">
@@ -270,7 +269,7 @@
           </div>
         </div>
 
-        <!-- Exception reason code modal -->
+
         <div class="modal fade" id="exceptionModal" tabindex="-1" aria-labelledby="exceptionModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -319,8 +318,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../static/js/dashboard.js"></script>
   <script>
-    // Show which driver the exception is for. Validation and the success
-    // message come from the shared .needs-validation code in dashboard.js.
+
     document.getElementById('exceptionModal').addEventListener('show.bs.modal', event => {
       document.getElementById('exceptionDriver').textContent = event.relatedTarget?.dataset.driver || '';
     });
