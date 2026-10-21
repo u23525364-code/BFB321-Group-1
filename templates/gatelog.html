@@ -1,122 +1,231 @@
-{% extends "base.html" %}
-{% block title %}Gate log{% endblock %}
-{% block page_title %}Gate activity log{% endblock %}
-{% block page_subtitle %}Auditable record of every RFID scan event{% endblock %}
-
-{% block content %}
-    <!-- Gate Search Filter -->
-    <section class="panel mb-3">
-      <div class="panel-body">
-        <form class="row g-3 align-items-end needs-validation" novalidate data-success="Filters applied.">
-          <div class="col-6 col-md-3">
-            <label class="form-label" for="fDate">Date</label>
-            <input type="date" class="form-control form-control-sm" id="fDate" required max="2026-12-31">
-            <div class="invalid-feedback">Choose a date.</div>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label" for="fGate">Gate</label>
-            <select class="form-select form-select-sm" id="fGate"><option>All</option><option>HPC - Lanseria</option><option>Dealership 1</option><option>Dealership 2</option><option>Dealership 3</option><option>Dealership 4</option></select>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label" for="fDirection">Direction</label>
-            <select class="form-select form-select-sm" id="fDirection"><option>All</option><option>Entry</option><option>Exit</option></select>
-          </div>
-          <div class="col-6 col-md-3 d-flex gap-2">
-            <button type="submit" class="btn btn-sm btn-primary flex-fill"><i class="bi bi-search" aria-hidden="true"></i>Search</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download" aria-hidden="true"></i>Export</button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Scan Events Table -->
-    <section class="panel">
-      <header class="panel-header">
-        <div>
-          <h2 class="panel-title">Scan events</h2>
-          <p class="panel-subtitle">1 248 records</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gate log · HPC Delivery Dashboard</title>
+  <link rel="icon" href="../static/img/halfway-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/halfway-theme.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-shell">
+    <!-- Sidebar: fixed on desktop, off-canvas drawer below 992px -->
+    <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-brand">
+          <a href="home.html" class="sidebar-brand-link">
+            <img src="../static/img/halfway-logo.png" alt="Halfway" class="sidebar-logo">
+            <span class="sidebar-product">HPC Delivery Dashboard</span>
+          </a>
+          <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Close navigation"></button>
         </div>
-      </header>
-      <div class="panel-body-flush table-responsive">
-        <table class="table table-hw table-hover align-middle" id="gateLogTable">
-          <thead>
-            <tr>
-              <th class="sortable-header">Date</th>
-              <th class="sortable-header">Time</th>
-              <th class="sortable-header">Gate</th>
-              <th class="sortable-header">Direction</th>
-              <th class="sortable-header">Tag ID</th>
-              <th>Matched to cycle</th>
-              <th>Cycle status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>07 Sep</td>
-              <td>14:31</td>
-              <td class="cell-primary">HPC - Lanseria</td>
-              <td><span class="direction"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Exit</span></td>
-              <td>TRK-002</td>
-              <td>Cycle 1094</td>
-              <td><span class="badge-status badge-warn">In progress</span></td>
-            </tr>
-            <tr>
-              <td>07 Sep</td>
-              <td>14:22</td>
-              <td class="cell-primary">Dealership 2</td>
-              <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-              <td>TRK-001</td>
-              <td>Cycle 1093</td>
-              <td><span class="badge-status badge-warn">In progress</span></td>
-            </tr>
-            <tr>
-              <td>07 Sep</td>
-              <td>14:05</td>
-              <td class="cell-primary">HPC - Lanseria</td>
-              <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-              <td>TRK-002</td>
-              <td>Cycle 1092</td>
-              <td><span class="badge-status badge-good">Complete</span></td>
-            </tr>
-            <tr>
-              <td>07 Sep</td>
-              <td>13:01</td>
-              <td class="cell-primary">HPC - Lanseria</td>
-              <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-              <td>TRK-001</td>
-              <td>Cycle 1091</td>
-              <td><span class="badge-status badge-crit">Breach</span></td>
-            </tr>
-            <tr>
-              <td>07 Sep</td>
-              <td>08:55</td>
-              <td class="cell-primary">Dealership 2</td>
-              <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-              <td>TRK-001</td>
-              <td class="text-muted">—</td>
-              <td><span class="badge-status badge-none">Unmatched</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      <!-- Accessible Pagination -->
-      <footer class="panel-footer">
-        <span>Showing 1–5 of 1 248</span>
-        <nav aria-label="Gate Log Pagination">
-          <ul class="pagination pagination-sm mb-0">
-            <li class="page-item disabled"><a class="page-link" aria-disabled="true">Previous</a></li>
-            <li class="page-item active"><a class="page-link" href="#" aria-current="page">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+        <nav aria-label="Main navigation">
+          <div class="sidebar-section">Overview</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="home.html">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          </ul>
+          <div class="sidebar-section">Operations</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="live.html">
+                <i class="bi bi-broadcast" aria-hidden="true"></i>
+                <span>Live deliveries</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="alerts.html">
+                <i class="bi bi-bell" aria-hidden="true"></i>
+                <span>Breach alerts</span>
+                <span class="badge rounded-pill text-bg-danger ms-auto">4<span class="visually-hidden"> new</span></span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link active" href="gatelog.html" aria-current="page">
+                <i class="bi bi-upc-scan" aria-hidden="true"></i>
+                <span>Gate log</span>
+              </a>
+            </li>
+          </ul>
+          <div class="sidebar-section">Planning</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="reports.html">
+                <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                <span>Reports</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="capacity.html">
+                <i class="bi bi-sliders" aria-hidden="true"></i>
+                <span>Capacity</span>
+              </a>
+            </li>
           </ul>
         </nav>
-      </footer>
-    </section>
 
-    <aside class="design-note">
-      <i class="bi bi-info-circle" aria-hidden="true"></i>
-      <p class="mb-0">Unmatched scans are shown rather than discarded, so that any gap in RFID read reliability is visible instead of silently distorting compliance figures.</p>
+        <div class="sidebar-footer">
+          <span class="avatar avatar-dark" aria-hidden="true">M</span>
+          <div class="sidebar-user">
+            <div class="sidebar-user-name">Manager</div>
+            <div class="sidebar-user-role">Full access</div>
+          </div>
+          <a href="login.html" class="sidebar-logout" title="Log out" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></a>
+        </div>
+      </div>
     </aside>
-{% endblock %}
+
+    <div class="app-main">
+      <header class="navbar app-topbar">
+        <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="topbar-heading">
+          <h1 class="page-title">Gate activity log</h1>
+          <p class="page-subtitle">Auditable record of every RFID scan event</p>
+        </div>
+        <div class="topbar-meta">
+          <span class="live-indicator d-none d-md-inline-flex"><span class="live-dot" aria-hidden="true"></span>Receiving scan data</span>
+          <span class="d-none d-sm-inline"><i class="bi bi-clock me-1" aria-hidden="true"></i>Mon 14:32</span>
+        </div>
+      </header>
+
+      <main class="app-content" id="main-content" tabindex="-1">
+        <!-- Gate search filter -->
+        <section class="card mb-3" aria-label="Gate log filters">
+          <div class="card-body">
+            <form class="row g-3 align-items-end needs-validation" novalidate data-success="Filters applied.">
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="fDate">Date</label>
+                <input type="date" class="form-control form-control-sm" id="fDate" required max="2026-12-31">
+                <div class="invalid-feedback">Choose a date.</div>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="fGate">Gate</label>
+                <select class="form-select form-select-sm" id="fGate"><option>All</option><option>HPC - Lanseria</option><option>Dealership 1</option><option>Dealership 2</option><option>Dealership 3</option><option>Dealership 4</option></select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="fDirection">Direction</label>
+                <select class="form-select form-select-sm" id="fDirection"><option>All</option><option>Entry</option><option>Exit</option></select>
+              </div>
+              <div class="col-6 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary flex-fill"><i class="bi bi-search" aria-hidden="true"></i>Search</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download" aria-hidden="true"></i>Export</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Scan events table -->
+        <section class="card">
+          <header class="card-header">
+            <div>
+              <h2 class="card-title">Scan events</h2>
+              <p class="card-subtitle">1 248 records</p>
+            </div>
+          </header>
+          <div class="table-responsive">
+            <table class="table table-hw table-hover align-middle" id="gateLogTable">
+              <caption class="visually-hidden">RFID scan events at the HPC and dealership gates, newest first</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="sortable-header">Date</th>
+                  <th scope="col" class="sortable-header">Time</th>
+                  <th scope="col" class="sortable-header">Gate</th>
+                  <th scope="col" class="sortable-header">Direction</th>
+                  <th scope="col" class="sortable-header">Tag ID</th>
+                  <th scope="col">Matched to cycle</th>
+                  <th scope="col">Cycle status</th>
+                </tr>
+              </thead>
+              <tbody>
+                    <tr>
+                      <td>07 Sep</td>
+                      <td>14:31</td>
+                      <td class="cell-primary">HPC - Lanseria</td>
+                      <td><span class="direction"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Exit</span></td>
+                      <td>TRK-002</td>
+                      <td>Cycle 1094</td>
+                      <td><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">In progress</span></td>
+                    </tr>
+                    <tr>
+                      <td>07 Sep</td>
+                      <td>14:22</td>
+                      <td class="cell-primary">Dealership 2</td>
+                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
+                      <td>TRK-001</td>
+                      <td>Cycle 1093</td>
+                      <td><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">In progress</span></td>
+                    </tr>
+                    <tr>
+                      <td>07 Sep</td>
+                      <td>14:05</td>
+                      <td class="cell-primary">HPC - Lanseria</td>
+                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
+                      <td>TRK-002</td>
+                      <td>Cycle 1092</td>
+                      <td><span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">Complete</span></td>
+                    </tr>
+                    <tr>
+                      <td>07 Sep</td>
+                      <td>13:01</td>
+                      <td class="cell-primary">HPC - Lanseria</td>
+                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
+                      <td>TRK-001</td>
+                      <td>Cycle 1091</td>
+                      <td><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Breach</span></td>
+                    </tr>
+                    <tr>
+                      <td>07 Sep</td>
+                      <td>08:55</td>
+                      <td class="cell-primary">Dealership 2</td>
+                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
+                      <td>TRK-001</td>
+                      <td class="text-body-secondary">—</td>
+                      <td><span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Unmatched</span></td>
+                    </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Accessible pagination -->
+          <footer class="card-footer">
+            <span>Showing 1–5 of 1 248</span>
+            <nav aria-label="Gate log pagination">
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item disabled"><a class="page-link" aria-disabled="true">Previous</a></li>
+                <li class="page-item active"><a class="page-link" href="#" aria-current="page">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+              </ul>
+            </nav>
+          </footer>
+        </section>
+
+        <div class="design-note" role="note">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <p class="mb-0">Unmatched scans are shown rather than discarded, so that any gap in RFID read reliability is visible instead of silently distorting compliance figures.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../static/js/dashboard.js"></script>
+</body>
+</html>

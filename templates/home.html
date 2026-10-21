@@ -1,83 +1,247 @@
-{% extends "base.html" %}
-{% block title %}Home{% endblock %}
-{% block page_title %}Good afternoon{% endblock %}
-{% block page_subtitle %}Monday · 4 HPC locations · 2 trucks · 3 drivers{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home · HPC Delivery Dashboard</title>
+  <link rel="icon" href="../static/img/halfway-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/halfway-theme.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-shell">
+    <!-- Sidebar: fixed on desktop, off-canvas drawer below 992px -->
+    <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-brand">
+          <a href="home.html" class="sidebar-brand-link">
+            <img src="../static/img/halfway-logo.png" alt="Halfway" class="sidebar-logo">
+            <span class="sidebar-product">HPC Delivery Dashboard</span>
+          </a>
+          <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Close navigation"></button>
+        </div>
 
-{% block content %}
-    {% include "partials/kpi_summary.html" %}
+        <nav aria-label="Main navigation">
+          <div class="sidebar-section">Overview</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link active" href="home.html" aria-current="page">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          </ul>
+          <div class="sidebar-section">Operations</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="live.html">
+                <i class="bi bi-broadcast" aria-hidden="true"></i>
+                <span>Live deliveries</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="alerts.html">
+                <i class="bi bi-bell" aria-hidden="true"></i>
+                <span>Breach alerts</span>
+                <span class="badge rounded-pill text-bg-danger ms-auto">4<span class="visually-hidden"> new</span></span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="gatelog.html">
+                <i class="bi bi-upc-scan" aria-hidden="true"></i>
+                <span>Gate log</span>
+              </a>
+            </li>
+          </ul>
+          <div class="sidebar-section">Planning</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="reports.html">
+                <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                <span>Reports</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="capacity.html">
+                <i class="bi bi-sliders" aria-hidden="true"></i>
+                <span>Capacity</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
 
-    <!-- Navigation Hub Cards -->
-    <h2 class="h6 fw-bold text-muted text-uppercase small mb-3">Go to</h2>
-    <section class="row g-3 mb-4">
-      <div class="col-12 col-md-6 col-xl-4">
-        <a href="{{ url_for('live') }}" class="link-card">
-          <span class="link-card-icon"><i class="bi bi-broadcast" aria-hidden="true"></i></span>
-          <span>
-            <span class="link-card-title d-block">Real-time takt dashboard</span>
-            <span class="link-card-text d-block">Live countdown for every delivery cycle currently in progress</span>
-          </span>
-          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <a href="{{ url_for('reports') }}" class="link-card">
-          <span class="link-card-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
-          <span>
-            <span class="link-card-title d-block">Performance reporting</span>
-            <span class="link-card-text d-block">Takt compliance by driver, route, location and time period</span>
-          </span>
-          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <a href="{{ url_for('alerts') }}" class="link-card">
-          <span class="link-card-icon"><i class="bi bi-bell" aria-hidden="true"></i></span>
-          <span>
-            <span class="link-card-title d-block">Breach alerts</span>
-            <span class="link-card-text d-block">Cycles that exceeded 90 minutes, awaiting review</span>
-          </span>
-          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <a href="{{ url_for('capacity') }}" class="link-card">
-          <span class="link-card-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
-          <span>
-            <span class="link-card-title d-block">Capacity planning</span>
-            <span class="link-card-text d-block">Model current throughput against projected BYD volumes</span>
-          </span>
-          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <a href="{{ url_for('gatelog') }}" class="link-card">
-          <span class="link-card-icon"><i class="bi bi-upc-scan" aria-hidden="true"></i></span>
-          <span>
-            <span class="link-card-title d-block">Gate activity log</span>
-            <span class="link-card-text d-block">Auditable record of every RFID scan event</span>
-          </span>
-          <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <div class="link-card">
-          <span class="link-card-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
-          <span>
-            <span class="link-card-title d-block">Administration</span>
-            <span class="link-card-text d-block">Users, gates, readers and takt time targets</span>
-          </span>
+        <div class="sidebar-footer">
+          <span class="avatar avatar-dark" aria-hidden="true">M</span>
+          <div class="sidebar-user">
+            <div class="sidebar-user-name">Manager</div>
+            <div class="sidebar-user-role">Full access</div>
+          </div>
+          <a href="login.html" class="sidebar-logout" title="Log out" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></a>
         </div>
       </div>
-    </section>
-
-    <!-- System Status Bar -->
-    <div class="status-strip">
-      <div><strong>Last scan</strong> · 14:31 · HPC gate · Exit · TRK-002</div>
-      <div class="live-indicator d-inline-flex"><span class="live-dot" aria-hidden="true"></span>System status: receiving scan data normally</div>
-    </div>
-
-    <aside class="design-note">
-      <i class="bi bi-info-circle" aria-hidden="true"></i>
-      <p class="mb-0">The home page is a navigation hub rather than a working screen. Each tile opens one of the functions described in the solution framework. Summary figures are repeated from the live dashboard so a manager can see the day's position without opening it.</p>
     </aside>
-{% endblock %}
+
+    <div class="app-main">
+      <header class="navbar app-topbar">
+        <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="topbar-heading">
+          <h1 class="page-title">Good afternoon</h1>
+          <p class="page-subtitle">Monday · 4 HPC locations · 2 trucks · 3 drivers</p>
+        </div>
+        <div class="topbar-meta">
+          <span class="live-indicator d-none d-md-inline-flex"><span class="live-dot" aria-hidden="true"></span>Receiving scan data</span>
+          <span class="d-none d-sm-inline"><i class="bi bi-clock me-1" aria-hidden="true"></i>Mon 14:32</span>
+        </div>
+      </header>
+
+      <main class="app-content" id="main-content" tabindex="-1">
+        <!-- Today's headline KPIs -->
+        <section class="row g-3 mb-4" aria-label="Today's summary">
+          <div class="col-6 col-xl-3">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="kpi-head">
+                  <span class="kpi-title">Deliveries today</span>
+                  <span class="kpi-icon"><i class="bi bi-truck" aria-hidden="true"></i></span>
+                </div>
+                <div class="kpi-value">8<span class="kpi-unit">/ 12</span></div>
+                <div class="progress progress-xs mt-3" role="progressbar" aria-label="Deliveries completed" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar bg-chart-1" style="width: 67%;"></div>
+                </div>
+                <div class="kpi-meta">4 remaining today</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="kpi-head">
+                  <span class="kpi-title">Takt compliance</span>
+                  <span class="kpi-icon"><i class="bi bi-stopwatch" aria-hidden="true"></i></span>
+                </div>
+                <div class="kpi-value">75<span class="kpi-unit">%</span></div>
+                <div class="kpi-meta"><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">At risk</span>cycles within 90 min</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="kpi-head">
+                  <span class="kpi-title">Breaches today</span>
+                  <span class="kpi-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
+                </div>
+                <div class="kpi-value">2</div>
+                <div class="kpi-meta"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Needs review</span><a href="alerts.html">View alerts</a></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="kpi-head">
+                  <span class="kpi-title">Trucks in use</span>
+                  <span class="kpi-icon"><i class="bi bi-truck-front" aria-hidden="true"></i></span>
+                </div>
+                <div class="kpi-value">2<span class="kpi-unit">/ 2</span></div>
+                <div class="progress progress-xs mt-3" role="progressbar" aria-label="Trucks in use" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar bg-chart-1" style="width: 100%;"></div>
+                </div>
+                <div class="kpi-meta">No spare trucks</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navigation hub cards -->
+        <h2 class="h6 fw-bold text-body-secondary text-uppercase small mb-3">Go to</h2>
+        <section class="row g-3 mb-4">
+          <div class="col-12 col-md-6 col-xl-4">
+            <a href="live.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+              <span class="link-card-icon"><i class="bi bi-broadcast" aria-hidden="true"></i></span>
+              <span>
+                <span class="link-card-title d-block">Real-time takt dashboard</span>
+                <span class="link-card-text d-block">Live countdown for every delivery cycle currently in progress</span>
+              </span>
+              <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <a href="reports.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+              <span class="link-card-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
+              <span>
+                <span class="link-card-title d-block">Performance reporting</span>
+                <span class="link-card-text d-block">Takt compliance by driver, route, location and time period</span>
+              </span>
+              <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <a href="alerts.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+              <span class="link-card-icon"><i class="bi bi-bell" aria-hidden="true"></i></span>
+              <span>
+                <span class="link-card-title d-block">Breach alerts</span>
+                <span class="link-card-text d-block">Cycles that exceeded 90 minutes, awaiting review</span>
+              </span>
+              <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <a href="capacity.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+              <span class="link-card-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+              <span>
+                <span class="link-card-title d-block">Capacity planning</span>
+                <span class="link-card-text d-block">Model current throughput against projected BYD volumes</span>
+              </span>
+              <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <a href="gatelog.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+              <span class="link-card-icon"><i class="bi bi-upc-scan" aria-hidden="true"></i></span>
+              <span>
+                <span class="link-card-title d-block">Gate activity log</span>
+                <span class="link-card-text d-block">Auditable record of every RFID scan event</span>
+              </span>
+              <i class="bi bi-arrow-right link-card-arrow" aria-hidden="true"></i>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="card card-body link-card flex-row align-items-start gap-3 h-100">
+              <span class="link-card-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
+              <span>
+                <span class="link-card-title d-block">Administration</span>
+                <span class="link-card-text d-block">Users, gates, readers and takt time targets</span>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- System status bar -->
+        <div class="status-strip">
+          <div><strong>Last scan</strong> · 14:31 · HPC gate · Exit · TRK-002</div>
+          <div class="live-indicator d-inline-flex"><span class="live-dot" aria-hidden="true"></span>System status: receiving scan data normally</div>
+        </div>
+
+        <div class="design-note" role="note">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <p class="mb-0">The home page is a navigation hub rather than a working screen. Each tile opens one of the functions described in the solution framework. Summary figures are repeated from the live dashboard so a manager can see the day's position without opening it.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../static/js/dashboard.js"></script>
+</body>
+</html>

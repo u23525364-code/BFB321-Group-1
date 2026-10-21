@@ -1,129 +1,243 @@
-{% extends "base.html" %}
-{% block title %}Capacity planning{% endblock %}
-{% block page_title %}Capacity planning{% endblock %}
-{% block page_subtitle %}Model current driver capacity against projected volumes{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capacity planning · HPC Delivery Dashboard</title>
+  <link rel="icon" href="../static/img/halfway-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/halfway-theme.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-shell">
+    <!-- Sidebar: fixed on desktop, off-canvas drawer below 992px -->
+    <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-brand">
+          <a href="home.html" class="sidebar-brand-link">
+            <img src="../static/img/halfway-logo.png" alt="Halfway" class="sidebar-logo">
+            <span class="sidebar-product">HPC Delivery Dashboard</span>
+          </a>
+          <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Close navigation"></button>
+        </div>
 
-{% block content %}
-    <div class="row g-3">
-      <!-- Scenario inputs. Submitted to Flask, which runs models/capacity.py -->
-      <div class="col-12 col-lg-4">
-        <section class="panel">
-          <header class="panel-header">
-            <h2 class="panel-title">Scenario inputs</h2>
-          </header>
-          <form id="capacityForm" class="panel-body needs-validation" method="get" action="{{ url_for('capacity') }}" novalidate>
-            <div class="mb-3">
-              <label class="form-label" for="scenario">Scenario name</label>
-              <input type="text" class="form-control" id="scenario" name="scenario" value="{{ scenario_name }}" maxlength="60">
-            </div>
-            <div class="row g-3 mb-3">
-              {% for name, (label, kind, default, low, high) in fields.items() %}
-              {% set error = errors.get(name) %}
-              <div class="col-6">
-                <label class="form-label" for="inp-{{ name }}">{{ label }}</label>
-                <input type="number" id="inp-{{ name }}" name="{{ name }}"
-                       class="form-control{% if error %} is-invalid{% endif %}"
-                       value="{{ '%g' | format(values[name]) if values[name] is number else values[name] }}" min="{{ low }}" max="{{ high }}"
-                       step="{{ 1 if kind.__name__ == 'int' else 'any' }}" required
-                       aria-describedby="err-{{ name }}">
-                <div class="invalid-feedback" id="err-{{ name }}">{{ error or (label ~ " must be between " ~ low ~ " and " ~ high ~ ".") }}</div>
-              </div>
-              {% endfor %}
-            </div>
-            <button type="submit" class="btn btn-primary w-100 mb-2"><i class="bi bi-play-fill" aria-hidden="true"></i>Run scenario</button>
-            <a href="{{ url_for('capacity') }}" class="btn btn-outline-secondary w-100">Reset to defaults</a>
-          </form>
-        </section>
-      </div>
+        <nav aria-label="Main navigation">
+          <div class="sidebar-section">Overview</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="home.html">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          </ul>
+          <div class="sidebar-section">Operations</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="live.html">
+                <i class="bi bi-broadcast" aria-hidden="true"></i>
+                <span>Live deliveries</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="alerts.html">
+                <i class="bi bi-bell" aria-hidden="true"></i>
+                <span>Breach alerts</span>
+                <span class="badge rounded-pill text-bg-danger ms-auto">4<span class="visually-hidden"> new</span></span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="gatelog.html">
+                <i class="bi bi-upc-scan" aria-hidden="true"></i>
+                <span>Gate log</span>
+              </a>
+            </li>
+          </ul>
+          <div class="sidebar-section">Planning</div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link" href="reports.html">
+                <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                <span>Reports</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link sidebar-link active" href="capacity.html" aria-current="page">
+                <i class="bi bi-sliders" aria-hidden="true"></i>
+                <span>Capacity</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
 
-      <!-- Results from plan_scenario() -->
-      <div class="col-12 col-lg-8 d-flex flex-column gap-3">
-        <section class="panel">
-          <header class="panel-header">
-            <div>
-              <h2 class="panel-title">Results{% if scenario_name %} · {{ scenario_name }}{% endif %}</h2>
-              <p class="panel-subtitle">Current → projected</p>
-            </div>
-          </header>
-          <div class="panel-body">
-            {% if result %}
-            {% set over = not result.sufficient %}
-            <div class="row g-3 mb-3">
-              <div class="col-6 col-md-3">
-                <div class="compare-stat">
-                  <div class="kpi-title">Deliveries / day</div>
-                  <div class="compare-values"><span class="compare-from">{{ result.baseline_daily }}</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to">{{ result.projected_daily }}</span></div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="compare-stat">
-                  <div class="kpi-title">Drivers required</div>
-                  <div class="compare-values"><span class="compare-from">{{ result.baseline_drivers_required }}</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to{% if over %} text-danger{% endif %}">{{ result.drivers_required }}</span></div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="compare-stat">
-                  <div class="kpi-title">Fleet load</div>
-                  <div class="compare-values"><span class="compare-from">{{ result.load_percent_current | round | int }}%</span><i class="bi bi-arrow-right compare-arrow" aria-label="to"></i><span class="compare-to{% if result.load_percent_current_fleet > result.target_utilisation_percent %} text-danger{% endif %}">{{ result.load_percent_current_fleet | round | int }}%</span></div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="compare-stat">
-                  <div class="kpi-title">Fleet capacity / day</div>
-                  <div class="compare-values"><span class="compare-to{% if over %} text-danger{% endif %}">{{ result.current_capacity }}</span></div>
-                </div>
-              </div>
-            </div>
-
-            {% if over %}
-            <div class="alert alert-danger mb-0" role="status">
-              <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
-              <div><strong>Over capacity.</strong> {{ result.projected_daily }} deliveries / day exceeds the {{ result.current_capacity }} that {{ result.current_drivers }} driver{{ 's' if result.current_drivers != 1 }} can complete. {{ result.additional_drivers }} additional driver{{ 's' if result.additional_drivers != 1 }} required.</div>
-            </div>
-            {% else %}
-            <div class="alert alert-success mb-0" role="status">
-              <i class="bi bi-check-circle" aria-hidden="true"></i>
-              <div><strong>Within capacity.</strong> {{ result.current_drivers }} driver{{ 's' if result.current_drivers != 1 }} can complete up to {{ result.current_capacity }} deliveries / day, covering the projected {{ result.projected_daily }}.</div>
-            </div>
-            {% endif %}
-            {% else %}
-            <div class="alert alert-warning mb-0" role="alert">
-              <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
-              <div><strong>Check the inputs.</strong> Fix the highlighted fields and run the scenario again.</div>
-            </div>
-            {% endif %}
+        <div class="sidebar-footer">
+          <span class="avatar avatar-dark" aria-hidden="true">M</span>
+          <div class="sidebar-user">
+            <div class="sidebar-user-name">Manager</div>
+            <div class="sidebar-user-role">Full access</div>
           </div>
-        </section>
-
-        {% if result %}
-        <section class="panel">
-          <header class="panel-header">
-            <div>
-              <h2 class="panel-title">Driver fleet load</h2>
-              <p class="panel-subtitle">Share of total shift time needed for the deliveries · dashed line = {{ result.target_utilisation_percent | round | int }}% target utilisation</p>
-            </div>
-          </header>
-          <div class="panel-body">
-            <div class="chart-box">
-              <canvas id="utilChart" role="img"
-                      aria-label="Fleet load: current {{ result.load_percent_current | round | int }} percent, projected {{ result.load_percent_current_fleet | round | int }} percent, target {{ result.target_utilisation_percent | round | int }} percent"></canvas>
-            </div>
-          </div>
-        </section>
-        {% endif %}
+          <a href="login.html" class="sidebar-logout" title="Log out" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></a>
+        </div>
       </div>
-    </div>
-
-    <aside class="design-note">
-      <i class="bi bi-info-circle" aria-hidden="true"></i>
-      <p class="mb-0">Results are calculated by the standalone model in <code>models/capacity.py</code>: drivers required = ⌈deliveries × cycle time ÷ (shift × utilisation)⌉, rounded up because a partial driver is not possible. Change the inputs and re-run whenever volumes or fleet size change.</p>
     </aside>
-{% endblock %}
 
-{% block scripts %}
-  {% if result %}
+    <div class="app-main">
+      <header class="navbar app-topbar">
+        <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="topbar-heading">
+          <h1 class="page-title">Capacity planning</h1>
+          <p class="page-subtitle">Model current driver capacity against projected volumes</p>
+        </div>
+        <div class="topbar-meta">
+          <span class="live-indicator d-none d-md-inline-flex"><span class="live-dot" aria-hidden="true"></span>Receiving scan data</span>
+          <span class="d-none d-sm-inline"><i class="bi bi-clock me-1" aria-hidden="true"></i>Mon 14:32</span>
+        </div>
+      </header>
+
+      <main class="app-content" id="main-content" tabindex="-1">
+        <div class="row g-3">
+          <!-- Scenario inputs: client-side validation only -->
+          <div class="col-12 col-lg-4">
+            <section class="card">
+              <header class="card-header">
+                <h2 class="card-title">Scenario inputs</h2>
+              </header>
+              <form id="capacityForm" class="card-body needs-validation" novalidate>
+                <div class="mb-3">
+                  <label class="form-label" for="scenario">Scenario name</label>
+                  <input type="text" class="form-control" id="scenario" name="scenario" value="BYD onboarding" maxlength="60" aria-describedby="hint-scenario">
+                  <div class="form-text" id="hint-scenario">Optional. Up to 60 characters.</div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                      <label class="form-label" for="inp-baseline">Deliveries / day</label>
+                      <input type="number" id="inp-baseline" name="baseline" class="form-control" value="13" min="0" max="500" step="1" required aria-describedby="hint-baseline err-baseline">
+                      <div class="form-text" id="hint-baseline">Whole number, 0 to 500</div>
+                      <div class="invalid-feedback" id="err-baseline">Enter a whole number from 0 to 500.</div>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="inp-uplift">Volume uplift (%)</label>
+                      <input type="number" id="inp-uplift" name="uplift" class="form-control" value="30" min="-100" max="500" step="any" required aria-describedby="hint-uplift err-uplift">
+                      <div class="form-text" id="hint-uplift">-100 to 500, e.g. 30 for +30%</div>
+                      <div class="invalid-feedback" id="err-uplift">Enter a percentage from -100 to 500.</div>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="inp-drivers">Current drivers</label>
+                      <input type="number" id="inp-drivers" name="drivers" class="form-control" value="3" min="1" max="100" step="1" required aria-describedby="hint-drivers err-drivers">
+                      <div class="form-text" id="hint-drivers">Whole number, 1 to 100</div>
+                      <div class="invalid-feedback" id="err-drivers">Enter a whole number from 1 to 100.</div>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="inp-cycle">Cycle time (min)</label>
+                      <input type="number" id="inp-cycle" name="cycle" class="form-control" value="81" min="1" max="600" step="any" required aria-describedby="hint-cycle err-cycle">
+                      <div class="form-text" id="hint-cycle">1 to 600 minutes</div>
+                      <div class="invalid-feedback" id="err-cycle">Enter a cycle time from 1 to 600 minutes.</div>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="inp-shift">Shift length (hours)</label>
+                      <input type="number" id="inp-shift" name="shift" class="form-control" value="10" min="1" max="24" step="any" required aria-describedby="hint-shift err-shift">
+                      <div class="form-text" id="hint-shift">1 to 24 hours</div>
+                      <div class="invalid-feedback" id="err-shift">Enter a shift length from 1 to 24 hours.</div>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="inp-utilisation">Target utilisation (%)</label>
+                      <input type="number" id="inp-utilisation" name="utilisation" class="form-control" value="85" min="1" max="100" step="any" required aria-describedby="hint-utilisation err-utilisation">
+                      <div class="form-text" id="hint-utilisation">1 to 100%</div>
+                      <div class="invalid-feedback" id="err-utilisation">Enter a percentage from 1 to 100.</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-2"><i class="bi bi-play-fill" aria-hidden="true"></i>Run scenario</button>
+                <button type="reset" class="btn btn-outline-secondary w-100">Reset to defaults</button>
+              </form>
+            </section>
+          </div>
+
+          <!-- Results: example figures for the default inputs -->
+          <div class="col-12 col-lg-8 d-flex flex-column gap-3">
+            <section class="card">
+              <header class="card-header">
+                <div>
+                  <h2 class="card-title">Results · BYD onboarding</h2>
+                  <p class="card-subtitle">Current → projected · example for the default inputs</p>
+                </div>
+              </header>
+              <div class="card-body">
+                <div class="row g-3 mb-3">
+                  <div class="col-6 col-md-3">
+                    <div class="compare-stat">
+                      <div class="kpi-title">Deliveries / day</div>
+                      <div class="compare-values"><span class="compare-from">13</span><i class="bi bi-arrow-right compare-arrow" role="img" aria-label="to"></i><span class="compare-to">17</span></div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="compare-stat">
+                      <div class="kpi-title">Drivers required</div>
+                      <div class="compare-values"><span class="compare-from">3</span><i class="bi bi-arrow-right compare-arrow" role="img" aria-label="to"></i><span class="compare-to">3</span></div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="compare-stat">
+                      <div class="kpi-title">Fleet load</div>
+                      <div class="compare-values"><span class="compare-from">59%</span><i class="bi bi-arrow-right compare-arrow" role="img" aria-label="to"></i><span class="compare-to">77%</span></div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="compare-stat">
+                      <div class="kpi-title">Fleet capacity / day</div>
+                      <div class="compare-values"><span class="compare-to">18</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="alert alert-success mb-0" role="status">
+                  <i class="bi bi-check-circle" aria-hidden="true"></i>
+                  <div><strong>Within capacity.</strong> 3 drivers can complete up to 18 deliveries / day, covering the projected 17.</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <header class="card-header">
+                <div>
+                  <h2 class="card-title">Driver fleet load</h2>
+                  <p class="card-subtitle">Share of total shift time needed for the deliveries · dashed line = 85% target utilisation</p>
+                </div>
+              </header>
+              <div class="card-body">
+                <div class="chart-box">
+                  <canvas id="utilChart" role="img" aria-label="Fleet load: current 59 percent, projected 77 percent, target 85 percent"></canvas>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="design-note" role="note">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <p class="mb-0">Step 1 build: the figures on the right are an example for the default inputs, and the form checks its inputs in the browser. In the final build the inputs go to the capacity model in <code>models/capacity.py</code> (drivers required = ⌈deliveries × cycle time ÷ (shift × utilisation)⌉, rounded up because a partial driver is not possible) and the page shows what it returns.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="../static/js/dashboard.js"></script>
   <script>
-    const target = {{ result.target_utilisation_percent | tojson }};
+    // Example figures for the default scenario (replaced by the capacity model's results later).
+    const target = 85;
+    const current = 59;
+    const projected = 77;
 
     // Dashed reference line at the target utilisation
     const targetLine = {
@@ -143,14 +257,11 @@
       }
     };
 
-    const current = Math.round({{ result.load_percent_current | tojson }});
-    const projected = Math.round({{ result.load_percent_current_fleet | tojson }});
-
     new Chart(document.getElementById('utilChart'), {
       type: 'bar',
       plugins: [targetLine],
       data: {
-        labels: ['{{ result.current_drivers }} driver{{ "s" if result.current_drivers != 1 }}'],
+        labels: ['3 drivers'],
         datasets: [
           { label: 'Current', data: [current], backgroundColor: cssVar('--chart-baseline'), borderRadius: 6, maxBarThickness: 64 },
           { label: 'Projected', data: [projected], backgroundColor: cssVar(projected > target ? '--chart-2' : '--chart-1'), borderRadius: 6, maxBarThickness: 64 }
@@ -167,6 +278,16 @@
         }
       }
     });
+
+    // Form: dashboard.js blocks invalid input and shows the messages. A valid form has
+    // no model behind it yet, so confirm with a message and keep the values.
+    const form = document.getElementById('capacityForm');
+    form.addEventListener('submit', event => {
+      if (event.defaultPrevented) return;
+      event.preventDefault();
+      showToast('Inputs are valid. Results will update once the capacity model is connected.');
+    });
+    form.addEventListener('reset', () => form.classList.remove('was-validated'));
   </script>
-  {% endif %}
-{% endblock %}
+</body>
+</html>
