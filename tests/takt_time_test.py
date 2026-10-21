@@ -4,7 +4,7 @@ import pytest
 
 from models import takt_time as tt
 
-"""cycle time minutes calculations"""
+#cycle time minutes calculations
 
 def test_cycle_time_min():
     """Hand calc: 10:00 -> 11:15 = 75 minutes"""
@@ -25,12 +25,13 @@ def test_cycle_time_crosses_midnight():
     assert tt.cycle_time_minutes(start, end) == 75.0 
 
 def test_cycle_time_end_before_start_raises():
+    """testing the logical test of end occurring before the start"""
     start = datetime(2026, 10, 19, 11, 0)
     end = datetime(2026, 10, 19, 10, 0)
     with pytest.raises(ValueError):
         tt.cycle_time_minutes(start, end)
 
-"""takt time/ remaining time/ breach status"""
+#takt time/ remaining time/ breach status
 
 def test_takt_used_percent():
     """Hand calc: 45/90 *100 = 50%"""
@@ -38,17 +39,17 @@ def test_takt_used_percent():
     assert tt.takt_used_percent(99) == pytest.approx(110.0)
 
 def test_minutes_remaining():
-    """testing the remianing minutes and overflow. hand calc: 90 - 30 = 60. 90 - 100 = -10"""
+    """testing the remaining minutes and overflow. hand calc: 90 - 30 = 60. 90 - 100 = -10"""
     assert tt.minutes_remaining(30) == 60.0 
     assert tt.minutes_remaining(100) == -10.0
 
 def test_is_breach_boundaries():
-    """testing the validity of the status assignment."""
+    """exactly 90 minutes is not a breach, anything more is"""
     assert tt.is_breach(89.99) is False
     assert tt.is_breach(90) is False
     assert tt.is_breach(90.01) is True
 
-"""Status Classification"""
+#Status Classification
 
 @pytest.mark.parametrize("elapsed, expected", [
     (0, tt.STATUS_ON_TRACK), 
@@ -69,7 +70,7 @@ def test_classify_status_custom_threshold():
     assert tt.classify_status(44, at_risk_fraction= 0.5) == tt.STATUS_ON_TRACK
     assert tt.classify_status(45, at_risk_fraction= 0.5) == tt.STATUS_AT_RISK
 
-"""Aggregate testing of many cycles in a set"""
+#Aggregate testing of many cycles in a set
 
 def test_average_cycle_time():
     """hand calc: (60 + 80 + 90 + 95 + 120)/ 5 = 445/5 = 89.0"""
@@ -81,9 +82,9 @@ def test_compliance_rate():
 
 def test_summarise_cycles(): 
     """hand calc for [60, 72, 80, 90, 95, 120]: 
-    count = 6m, sum = 517, average = 86.166666...
+    count = 6, sum = 517, average = 86.166666...
     on_track: 60 -> 1 | at_risk: 72, 80, 90 -> 3 | breached: 95, 120 -> 2
-    compliance = 4 withint takt = 4/6 = 66.67% """
+    compliance = 4 within takt = 4/6 = 66.67% """
     result = tt.summarise_cycles([60, 72, 80, 90, 95, 120])
    
     assert result["count"] == 6
@@ -94,14 +95,16 @@ def test_summarise_cycles():
     assert result["breaches"] == 2
 
 def test_summarise_empty_returns_empty_state(): 
+    """ensuring the summary is not broken by an empty list"""
     result = tt.summarise_cycles([])
     assert result["count"] == 0
     assert result["average_minutes"] is None
     assert result["compliance_pct"] is None
 
-"""Invalid inputs"""
+#Invalid inputs
 
 def test_invalid_inputs_raise():
+    """further testing for input value errors"""
     with pytest.raises(ValueError):
         tt.classify_status(-1)
     with pytest.raises(ValueError):
@@ -113,4 +116,4 @@ def test_invalid_inputs_raise():
     with pytest.raises(ValueError):
         tt.compliance_rate([])
 
-        
+
