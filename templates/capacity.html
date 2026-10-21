@@ -16,7 +16,7 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="app-shell">
-    <!-- Sidebar: fixed on desktop, off-canvas drawer below 992px -->
+
     <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Sidebar">
       <div class="sidebar-inner">
         <div class="sidebar-brand">
@@ -104,7 +104,7 @@
 
       <main class="app-content" id="main-content" tabindex="-1">
         <div class="row g-3">
-          <!-- Scenario inputs: client-side validation only -->
+
           <div class="col-12 col-lg-4">
             <section class="card">
               <header class="card-header">
@@ -160,7 +160,7 @@
             </section>
           </div>
 
-          <!-- Results: example figures for the default inputs -->
+
           <div class="col-12 col-lg-8 d-flex flex-column gap-3">
             <section class="card">
               <header class="card-header">
@@ -234,12 +234,12 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="../static/js/dashboard.js"></script>
   <script>
-    // Example figures for the default scenario (replaced by the capacity model's results later).
+
     const target = 85;
     const current = 59;
     const projected = 77;
 
-    // Dashed reference line at the target utilisation
+
     const targetLine = {
       id: 'targetLine',
       afterDatasetsDraw(chart) {
@@ -279,8 +279,7 @@
       }
     });
 
-    // Form: dashboard.js blocks invalid input and shows the messages. A valid form has
-    // no model behind it yet, so confirm with a message and keep the values.
+
     const form = document.getElementById('capacityForm');
     form.addEventListener('submit', event => {
       if (event.defaultPrevented) return;
