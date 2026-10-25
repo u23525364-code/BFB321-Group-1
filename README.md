@@ -1,5 +1,10 @@
 # BFB321-Semester-Project
 
+Uwen du Plessis u22631373
+Kadie Mc Intosh u23525364
+Luka Wood u24591344
+Dean Zartmann u24595773
+
 HPC delivery takt-time dashboard (Flask + Bootstrap 5.3). Monitors every driver
 delivery cycle against HPC's 90-minute takt time and plans driver capacity for
 the BYD volume increase.
