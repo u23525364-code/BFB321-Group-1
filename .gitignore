@@ -2,3 +2,8 @@
 __pycache__/
 .pytest_cache/
 .env
+venv/
+.venv-1/
+.pytest_cache/
+.DS_Store
+.vscode/
