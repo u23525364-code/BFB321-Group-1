@@ -1,5 +1,5 @@
 #changed name to services.py instead of models.py on slides as claude pointed out that the folder is already named models
-from db import query_all
+from models.db import query_all
 from models import takt_time
 
 DELIVERY_SELECT = """

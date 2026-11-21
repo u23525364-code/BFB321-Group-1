@@ -2,8 +2,8 @@ import os
 from flask import (Flask, flash, redirect, render_template,
                    request, url_for)
 
-import db
-import services
+import models.db as db
+import models.services as services
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY",

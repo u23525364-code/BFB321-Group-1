@@ -2,7 +2,7 @@
 import os
 import sys
 
-from db import BASE_DIR, connect
+from models.db import BASE_DIR, connect
 
 TABLES_IN_DROP_ORDER = ["scan_events", "deliveries", "locations", "trucks", "carriers"]
 
