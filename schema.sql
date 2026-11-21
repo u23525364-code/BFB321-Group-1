@@ -1,4 +1,4 @@
--- used Claude to help make this file, I tried and claude corrected my incorrect code, did this one table at a time...
+-- Made use of Claude to check and correct my attempts one table at a time.
 
 CREATE TABLE IF NOT EXISTS carriers (
     id INT AUTO_INCREMENT PRIMARY KEY,

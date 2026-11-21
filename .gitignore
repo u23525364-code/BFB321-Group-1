@@ -1,8 +1,8 @@
-.venv/
-__pycache__/
+.venv/ #Lecture Slides Class 5 pg 18
+__pycache__/ #Lecture Slides Class 5 pg 18
 .pytest_cache/
-.env
-venv/
+.env #Lecture Slides Class 5 pg 18
+venv/ #Lecture Slides Class 5 pg 18
 .venv-1/
 .pytest_cache/
 .DS_Store

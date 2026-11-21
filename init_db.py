@@ -1,11 +1,11 @@
-#literally copy pasted from the slides except for the tables in drop order elements
+#Lecture Slides Class 5 pg 27: Edits = TABLES_IN_DROP_ORDER elements changed to apply to our project.
+
 import os
 import sys
 
 from db import BASE_DIR, connect
 
 TABLES_IN_DROP_ORDER = ["scan_events", "deliveries", "locations", "trucks", "carriers"]
-
 
 def read_statements(filename):
     path = os.path.join(BASE_DIR, filename)
@@ -15,7 +15,6 @@ def read_statements(filename):
     return [s.strip()
             for s in "\n".join(lines).split(";")
             if s.strip()]
-
 
 def main(reset=False):
     conn = connect()
@@ -37,7 +36,6 @@ def main(reset=False):
                 print("Sample data NOT loaded (no seed.sql yet, or data already exists)")
         conn.commit()
     print("Done.")
-
 
 if __name__ == "__main__":
     main(reset="--reset" in sys.argv)
