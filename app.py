@@ -17,6 +17,7 @@ def index():
     return render_template("home.html", stats=stats)
 
 
+@app.route("/live")
 def live():
     return render_template("live.html")
 
@@ -48,6 +49,3 @@ def login():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-    @app.route("/live")
-
