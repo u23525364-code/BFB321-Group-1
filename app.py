@@ -1,5 +1,5 @@
 #Lecture Slides Class 5 pg 44: Edits = import "services" instead of "models"and changed the name of the file to servic es.py instead of models.py as claude pointed out that the folder is already named models,
-names of the html templates were changed to match the names of the html templates in the templates folder,
+#names of the html templates were changed to match the names of the html templates in the templates folder,
 
 import os
 from flask import (Flask, flash, redirect, render_template,
