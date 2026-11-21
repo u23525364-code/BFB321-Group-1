@@ -1,3 +1,4 @@
+#literally copy paste from the slides step 6 inventory application
 import os
 import pymysql
 from dotenv import load_dotenv
@@ -48,6 +49,7 @@ def query_one(sql, params=None):
     with get_db().cursor() as cur:
         cur.execute(sql, params or ())
         return cur.fetchone()
+
 
 
 def execute(sql, params=None):

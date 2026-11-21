@@ -1,3 +1,5 @@
+-- used Claude to help make this file, I tried and claude corrected my incorrect code, did this one table at a time...
+
 CREATE TABLE IF NOT EXISTS carriers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80) NOT NULL UNIQUE,
