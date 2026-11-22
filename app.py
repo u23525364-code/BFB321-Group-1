@@ -102,7 +102,11 @@ def reports():
 
 @app.route("/capacity")
 def capacity():
-    return render_template("capacity.html")
+    """BYD capacity scenario: read the form (GET), validate, run models/capacity.py."""
+    values, errors = services.read_capacity_inputs(request.args)
+    result = services.run_capacity_scenario(values)
+    return render_template("capacity.html", values=values, result=result,
+                           errors=errors)
 
 @app.route("/login")
 def login():
