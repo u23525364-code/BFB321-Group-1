@@ -22,7 +22,13 @@ def index():
 
 @app.route("/live")
 def live():
-    return render_template("live.html")
+    search = request.args.get("q", "").strip()
+    carrier_id = request.args.get("carrier", type=int)
+    return render_template("live.html",
+                           deliveries=services.list_deliveries(search, carrier_id),
+                           carriers=services.list_carriers(),
+                           stats=services.dashboard_stats(),
+                           search=search, carrier_id=carrier_id)
 
 @app.route("/alerts")
 def alerts():
