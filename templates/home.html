@@ -19,7 +19,7 @@
     <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Sidebar">
       <div class="sidebar-inner">
         <div class="sidebar-brand">
-          <a href="home.html" class="sidebar-brand-link">
+          <a href="{{ url_for('index') }}" class="sidebar-brand-link">
             <img src="../static/img/halfway-logo.png" alt="Halfway" class="sidebar-logo">
             <span class="sidebar-product">HPC Delivery Dashboard</span>
           </a>
@@ -30,7 +30,7 @@
           <div class="sidebar-section">Overview</div>
           <ul class="nav flex-column">
             <li class="nav-item">
-              <a class="nav-link sidebar-link active" href="home.html" aria-current="page">
+              <a class="nav-link sidebar-link active" href="{{ url_for('index') }}" aria-current="page">
                 <i class="bi bi-grid-1x2" aria-hidden="true"></i>
                 <span>Home</span>
               </a>
@@ -39,20 +39,20 @@
           <div class="sidebar-section">Operations</div>
           <ul class="nav flex-column">
             <li class="nav-item">
-              <a class="nav-link sidebar-link" href="live.html">
+              <a class="nav-link sidebar-link" href="{{ url_for('live') }}">
                 <i class="bi bi-broadcast" aria-hidden="true"></i>
                 <span>Live deliveries</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link sidebar-link" href="alerts.html">
+              <a class="nav-link sidebar-link" href="{{ url_for('alerts') }}">
                 <i class="bi bi-bell" aria-hidden="true"></i>
                 <span>Breach alerts</span>
                 <span class="badge rounded-pill text-bg-danger ms-auto">4<span class="visually-hidden"> new</span></span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link sidebar-link" href="gatelog.html">
+              <a class="nav-link sidebar-link" href="{{ url_for('gatelog') }}">
                 <i class="bi bi-upc-scan" aria-hidden="true"></i>
                 <span>Gate log</span>
               </a>
@@ -61,13 +61,13 @@
           <div class="sidebar-section">Planning</div>
           <ul class="nav flex-column">
             <li class="nav-item">
-              <a class="nav-link sidebar-link" href="reports.html">
+              <a class="nav-link sidebar-link" href="{{ url_for('reports') }}">
                 <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
                 <span>Reports</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link sidebar-link" href="capacity.html">
+              <a class="nav-link sidebar-link" href="{{ url_for('capacity') }}">
                 <i class="bi bi-sliders" aria-hidden="true"></i>
                 <span>Capacity</span>
               </a>
@@ -81,7 +81,7 @@
             <div class="sidebar-user-name">Manager</div>
             <div class="sidebar-user-role">Full access</div>
           </div>
-          <a href="login.html" class="sidebar-logout" title="Log out" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></a>
+          <a href="{{ url_for('login') }}" class="sidebar-logout" title="Log out" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></a>
         </div>
       </div>
     </aside>
@@ -126,7 +126,7 @@
                   <span class="kpi-title">Takt compliance</span>
                   <span class="kpi-icon"><i class="bi bi-stopwatch" aria-hidden="true"></i></span>
                 </div>
-                <div class="kpi-value">75<span class="kpi-unit">%</span></div>
+                <div class="kpi-value">{{ '%.1f'|format(stats.compliance_pct) }}<span class="kpi-unit">%</span></div> 
                 <div class="kpi-meta"><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">At risk</span>cycles within 90 min</div>
               </div>
             </div>
@@ -135,11 +135,11 @@
             <div class="card h-100">
               <div class="card-body d-flex flex-column">
                 <div class="kpi-head">
-                  <span class="kpi-title">Breaches today</span>
+                  <span class="kpi-title">Takt breaches</span>
                   <span class="kpi-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
                 </div>
-                <div class="kpi-value">2</div>
-                <div class="kpi-meta"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Needs review</span><a href="alerts.html">View alerts</a></div>
+                  <div class="kpi-value">{{ stats.breached }}</div>
+                <div class="kpi-meta"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Needs review</span><a href="{{ url_for('alerts') }}">View alerts</a></div>
               </div>
             </div>
           </div>
@@ -164,7 +164,7 @@
         <h2 class="h6 fw-bold text-body-secondary text-uppercase small mb-3">Go to</h2>
         <section class="row g-3 mb-4">
           <div class="col-12 col-md-6 col-xl-4">
-            <a href="live.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+            <a href="{{ url_for('live') }}" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
               <span class="link-card-icon"><i class="bi bi-broadcast" aria-hidden="true"></i></span>
               <span>
                 <span class="link-card-title d-block">Real-time takt dashboard</span>
@@ -174,7 +174,7 @@
             </a>
           </div>
           <div class="col-12 col-md-6 col-xl-4">
-            <a href="reports.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+            <a href="{{ url_for('reports') }}" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
               <span class="link-card-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
               <span>
                 <span class="link-card-title d-block">Performance reporting</span>
@@ -184,7 +184,7 @@
             </a>
           </div>
           <div class="col-12 col-md-6 col-xl-4">
-            <a href="alerts.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+            <a href="{{ url_for('alerts') }}" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
               <span class="link-card-icon"><i class="bi bi-bell" aria-hidden="true"></i></span>
               <span>
                 <span class="link-card-title d-block">Breach alerts</span>
@@ -194,7 +194,7 @@
             </a>
           </div>
           <div class="col-12 col-md-6 col-xl-4">
-            <a href="capacity.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+            <a href="{{ url_for('capacity') }}" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
               <span class="link-card-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
               <span>
                 <span class="link-card-title d-block">Capacity planning</span>
@@ -204,7 +204,7 @@
             </a>
           </div>
           <div class="col-12 col-md-6 col-xl-4">
-            <a href="gatelog.html" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
+            <a href="{{ url_for('gatelog') }}" class="card card-body link-card flex-row align-items-start gap-3 text-decoration-none h-100">
               <span class="link-card-icon"><i class="bi bi-upc-scan" aria-hidden="true"></i></span>
               <span>
                 <span class="link-card-title d-block">Gate activity log</span>
