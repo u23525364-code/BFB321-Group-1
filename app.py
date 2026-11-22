@@ -1,8 +1,9 @@
 #Lecture Slides Class 5 pg 44: Edits = import "services" instead of "models"and changed the name of the file to servic es.py instead of models.py as claude pointed out that the folder is already named models,
 #names of the html templates were changed to match the names of the html templates in the templates folder,
 
+import logging
 import os
-from flask import (Flask, flash, redirect, render_template,
+from flask import (Flask, flash, g, jsonify, redirect, render_template,
                    request, url_for)
 
 
@@ -14,9 +15,61 @@ from config import CONFIGS
 app = Flask(__name__)
 app_env = os.getenv("APP_ENV", "development")
 app.config.from_object(CONFIGS.get(app_env, CONFIGS["development"]))
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    handlers=[logging.FileHandler(os.path.join(LOG_DIR, "app.log")),
+              logging.StreamHandler()],
+)
+log = logging.getLogger("hpc")
 
 db.init_app(app)
 app.register_blueprint(api.bp)
+
+@app.after_request
+def log_failed_requests(response):
+    """Record every request that ended in an error (status 400 or higher)."""
+    if response.status_code >= 400:
+        log.warning("%s %s -> %s", request.method, request.full_path,
+                    response.status_code)
+    return response
+
+def _is_api_request():
+    """True for URLs under /api/: those callers expect JSON, not a web page."""
+    return request.path.startswith("/api/")
+
+
+@app.errorhandler(404)
+def not_found(error):
+    """Unknown URL or record: JSON for the API, a friendly page otherwise."""
+    if _is_api_request():
+        return jsonify(error="Not found."), 404
+    return render_template("error.html", code=404,
+                           message="That page does not exist."), 404
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    """Invalid input that reached Flask's own checks (e.g. broken JSON)."""
+    if _is_api_request():
+        return jsonify(error="Bad request: check the data you sent."), 400
+    return render_template("error.html", code=400,
+                           message="Something in your request was not valid."), 400
+
+
+@app.errorhandler(500)
+def server_error(error):
+    """Unexpected crash: undo half-finished database work, log it, hide the details."""
+    if "db" in g:
+        g.db.rollback()
+    log.exception("Unhandled error on %s %s", request.method, request.path)
+    if _is_api_request():
+        return jsonify(error="Internal server error."), 500
+    return render_template("error.html", code=500,
+                           message="Something went wrong on our side."), 500
+
 
 @app.route("/")
 def index():
