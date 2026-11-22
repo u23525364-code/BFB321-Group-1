@@ -1,7 +1,9 @@
 #Lecture Slides Class 5 pg 42: Edits = takt_status instead of stock_status, PRODUCT_SELECT becomes DELIVERY_SELECT etc., added list_scan_events function, added list_deliveries function, changed the name of the file to services.py instead of models.py as claude pointed out that the folder is already named models,
+import math
 
-from db import query_all
-from models import takt_time
+
+from db import query_all, query_one
+from models import takt_time, capacity
 
 def takt_status(turnaround_min):
     if turnaround_min is None:
@@ -117,3 +119,75 @@ def list_trucks():
         JOIN carriers c ON c.id = t.carrier_id
         ORDER BY t.truck_code
     """)
+
+def average_daily_deliveries():
+    """Average deliveries per day in the data = total deliveries / number of days with deliveries."""
+    row = query_one("""
+        SELECT COUNT(*) AS deliveries,
+               COUNT(DISTINCT DATE(gate_in_at)) AS days
+        FROM deliveries
+    """)
+    if not row["days"]:
+        return 0.0
+    return row["deliveries"] / row["days"]
+
+
+def capacity_defaults():
+    """Starting values for the capacity form: volume and cycle time come from the real data."""
+    stats = dashboard_stats()
+    return {
+        "baseline": math.ceil(average_daily_deliveries()),
+        "uplift": 30.0,
+        "drivers": 3,
+        "cycle": round(stats["average_minutes"], 1) or capacity.DEFAULT_CYCLE_MINUTES,
+        "shift": 8.0,
+        "utilisation": 85.0,
+    }
+
+
+# Each form field: (label for error messages, number type, minimum, maximum)
+CAPACITY_LIMITS = {
+    "baseline": ("Deliveries / day", int, 0, 500),
+    "uplift": ("Volume uplift (%)", float, -100, 500),
+    "drivers": ("Current drivers", int, 1, 100),
+    "cycle": ("Cycle time (min)", float, 1, 600),
+    "shift": ("Shift length (hours)", float, 1, 24),
+    "utilisation": ("Target utilisation (%)", float, 1, 100),
+}
+
+
+def read_capacity_inputs(args):
+    """Check the form values (they arrive as text).
+
+    Returns (values, errors). A missing field keeps its default; a bad one adds an error message.
+    """
+    values = capacity_defaults()
+    errors = []
+    for name, (label, kind, low, high) in CAPACITY_LIMITS.items():
+        raw = args.get(name, "").strip()
+        if raw == "":
+            continue
+        try:
+            value = kind(raw)
+        except ValueError:
+            word = "a whole number" if kind is int else "a number"
+            errors.append(f"{label} must be {word}.")
+            continue
+        if not low <= value <= high:
+            errors.append(f"{label} must be between {low} and {high}.")
+            continue
+        values[name] = value
+    return values, errors
+
+
+def run_capacity_scenario(values):
+    """Run the BYD scenario through models/capacity.py and add the current-state figures."""
+    shift_minutes = values["shift"] * 60
+    utilisation = values["utilisation"] / 100
+    result = capacity.plan_scenario(values["baseline"], values["uplift"], values["drivers"],
+                                    values["cycle"], shift_minutes, utilisation)
+    result["load_percent_now"] = capacity.load_percent(
+        values["baseline"], values["drivers"], values["cycle"], shift_minutes)
+    result["drivers_required_now"] = capacity.drivers_required(
+        values["baseline"], values["cycle"], shift_minutes, utilisation)
+    return result
