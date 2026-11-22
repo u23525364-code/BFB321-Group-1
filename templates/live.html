@@ -104,19 +104,16 @@
 
       <main class="app-content" id="main-content" tabindex="-1">
 
-        <section class="row g-3 mb-4" aria-label="Today's summary">
+          <section class="row g-3 mb-4" aria-label="Takt summary">
           <div class="col-6 col-xl-3">
             <div class="card h-100">
               <div class="card-body d-flex flex-column">
                 <div class="kpi-head">
-                  <span class="kpi-title">Deliveries today</span>
+                  <span class="kpi-title">Deliveries recorded</span>
                   <span class="kpi-icon"><i class="bi bi-truck" aria-hidden="true"></i></span>
                 </div>
-                <div class="kpi-value">8<span class="kpi-unit">/ 12</span></div>
-                <div class="progress progress-xs mt-3" role="progressbar" aria-label="Deliveries completed" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100">
-                  <div class="progress-bar bg-chart-1" style="width: 67%;"></div>
-                </div>
-                <div class="kpi-meta">4 remaining today</div>
+                <div class="kpi-value">{{ stats.deliveries }}</div>
+                <div class="kpi-meta">Average turnaround {{ '%.0f'|format(stats.average_minutes) }} min</div>
               </div>
             </div>
           </div>
@@ -127,8 +124,11 @@
                   <span class="kpi-title">Takt compliance</span>
                   <span class="kpi-icon"><i class="bi bi-stopwatch" aria-hidden="true"></i></span>
                 </div>
-                <div class="kpi-value">75<span class="kpi-unit">%</span></div>
-                <div class="kpi-meta"><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">At risk</span>cycles within 90 min</div>
+                <div class="kpi-value">{{ '%.1f'|format(stats.compliance_pct) }}<span class="kpi-unit">%</span></div>
+                <div class="progress progress-xs mt-3" role="progressbar" aria-label="Takt compliance" aria-valuenow="{{ stats.compliance_pct|round|int }}" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar bg-chart-1" style="width: {{ stats.compliance_pct|round|int }}%;"></div>
+                </div>
+                <div class="kpi-meta">visits within 90 min</div>
               </div>
             </div>
           </div>
@@ -136,11 +136,11 @@
             <div class="card h-100">
               <div class="card-body d-flex flex-column">
                 <div class="kpi-head">
-                  <span class="kpi-title">Breaches today</span>
+                  <span class="kpi-title">Takt breaches</span>
                   <span class="kpi-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
                 </div>
-                <div class="kpi-value">2</div>
-                <div class="kpi-meta"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Needs review</span><a href="{{ url_for('alerts') }}">View alerts</a></div>
+                <div class="kpi-value">{{ stats.breached }}</div>
+                <div class="kpi-meta"><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">{{ stats.at_risk }} at risk</span><a href="{{ url_for('alerts') }}">View alerts</a></div>
               </div>
             </div>
           </div>
@@ -148,18 +148,16 @@
             <div class="card h-100">
               <div class="card-body d-flex flex-column">
                 <div class="kpi-head">
-                  <span class="kpi-title">Trucks in use</span>
+                  <span class="kpi-title">Trucks on site</span>
                   <span class="kpi-icon"><i class="bi bi-truck-front" aria-hidden="true"></i></span>
                 </div>
-                <div class="kpi-value">2<span class="kpi-unit">/ 2</span></div>
-                <div class="progress progress-xs mt-3" role="progressbar" aria-label="Trucks in use" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                  <div class="progress-bar bg-chart-1" style="width: 100%;"></div>
-                </div>
-                <div class="kpi-meta">No spare trucks</div>
+                <div class="kpi-value">{{ stats.on_site }}</div>
+                <div class="kpi-meta">Gate in, not yet gated out</div>
               </div>
             </div>
           </div>
         </section>
+
 
         <div class="row g-3">
 
@@ -176,64 +174,37 @@
                   <caption class="visually-hidden">Delivery cycles in progress, with time used against the 90 minute takt target</caption>
                   <thead>
                     <tr>
-                      <th scope="col" class="sortable-header">Driver</th>
+                      <th scope="col" class="sortable-header">Delivery</th>
                       <th scope="col" class="sortable-header">Truck</th>
-                      <th scope="col" class="sortable-header">Destination</th>
-                      <th scope="col" class="sortable-header">Departed</th>
-                      <th scope="col" class="sortable-header">Elapsed / 90 min</th>
+                      <th scope="col" class="sortable-header">Carrier</th>
+                      <th scope="col" class="sortable-header">Dock</th>
+                      <th scope="col" class="sortable-header">Gate in</th>
+                      <th scope="col" class="sortable-header">Turnaround / 90 min</th>
                       <th scope="col" class="sortable-header">Status</th>
-                      <th scope="col"><span class="visually-hidden">Action</span></th>
                     </tr>
                   </thead>
                   <tbody>
-                      <tr>
-                        <td><div class="cell-person"><span class="avatar" aria-hidden="true">DA</span><span class="cell-primary">Driver A</span></div></td>
-                        <td>TRK-1</td>
-                        <td>Dealership 2</td>
-                        <td>13:18</td>
-                        <td>
-                          <div class="elapsed">
-                            <div class="progress" role="progressbar" aria-label="Takt time used by Driver A" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100">
-                              <div class="progress-bar bg-warning" style="width: 82%;"></div>
-                            </div>
-                            <span class="elapsed-value">74 min</span>
+                    {% for d in deliveries %}
+                    <tr>
+                      <td class="cell-primary">{{ d.delivery_code }}</td>
+                      <td>{{ d.truck_code }}</td>
+                      <td>{{ d.carrier }}</td>
+                      <td>{{ d.dock or '—' }}</td>
+                      <td>{{ d.gate_in_at.strftime('%d %b %H:%M') }}</td>
+                      <td>
+                        <div class="elapsed">
+                          {% set pct = [((d.turnaround_min or 0) / 90 * 100) | round | int, 100] | min %}
+                          <div class="progress" role="progressbar" aria-label="Takt time used by {{ d.delivery_code }}" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-{{ d.badge }}" style="width: {{ pct }}%;"></div>
                           </div>
-                        </td>
-                        <td><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">At risk</span></td>
-                        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exceptionModal" data-driver="Driver A" aria-label="Log exception for Driver A">Log exception</button></td>
-                      </tr>
-                      <tr>
-                        <td><div class="cell-person"><span class="avatar" aria-hidden="true">DB</span><span class="cell-primary">Driver B</span></div></td>
-                        <td>TRK-2</td>
-                        <td>Dealership 4</td>
-                        <td>13:44</td>
-                        <td>
-                          <div class="elapsed">
-                            <div class="progress" role="progressbar" aria-label="Takt time used by Driver B" aria-valuenow="53" aria-valuemin="0" aria-valuemax="100">
-                              <div class="progress-bar bg-success" style="width: 53%;"></div>
-                            </div>
-                            <span class="elapsed-value">48 min</span>
-                          </div>
-                        </td>
-                        <td><span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">On time</span></td>
-                        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exceptionModal" data-driver="Driver B" aria-label="Log exception for Driver B">Log exception</button></td>
-                      </tr>
-                      <tr>
-                        <td><div class="cell-person"><span class="avatar avatar-muted" aria-hidden="true">DC</span><span class="text-body-secondary">Driver C</span></div></td>
-                        <td class="text-body-secondary">—</td>
-                        <td class="text-body-secondary">Awaiting truck</td>
-                        <td class="text-body-secondary">—</td>
-                        <td>
-                          <div class="elapsed">
-                            <div class="progress" role="progressbar" aria-label="Takt time used by Driver C" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                              <div class="progress-bar bg-secondary" style="width: 0%;"></div>
-                            </div>
-                            <span class="elapsed-value text-body-secondary">—</span>
-                          </div>
-                        </td>
-                        <td><span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Idle</span></td>
-                        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exceptionModal" data-driver="Driver C" aria-label="Log exception for Driver C" disabled>Log exception</button></td>
-                      </tr>
+                          <span class="elapsed-value">{{ d.turnaround_min if d.turnaround_min is not none else '—' }} min</span>
+                        </div>
+                      </td>
+                      <td><span class="badge rounded-pill bg-{{ d.badge }}-subtle text-{{ d.badge }}-emphasis badge-dot">{{ d.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7">No deliveries match your search.</td></tr>
+                    {% endfor %}
                   </tbody>
                 </table>
               </div>

@@ -65,3 +65,6 @@ def list_scan_events(limit=100):
         ORDER BY s.scanned_at DESC
         LIMIT %s
     """, (limit,))
+
+def list_carriers():
+    return query_all("SELECT id, name FROM carriers ORDER BY name")
