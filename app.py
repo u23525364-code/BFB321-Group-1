@@ -8,10 +8,10 @@ from flask import (Flask, flash, redirect, render_template,
 
 import db
 import services
+import config from CONFIGS
 
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY",
-                                     "dev-only-change-me")
+app_env = os.getenv("FLASK_ENV", "development")
+app.config.from_object(CONFIGS.get(app_env, CONFIGS["development"]))
 
 db.init_app(app)
 
@@ -52,4 +52,4 @@ def login():
 
 #Lecture Slides Class 4 pg 7
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=app.config["DEBUG"])
