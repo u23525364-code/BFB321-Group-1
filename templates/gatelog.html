@@ -143,59 +143,33 @@
                 <tr>
                   <th scope="col" class="sortable-header">Date</th>
                   <th scope="col" class="sortable-header">Time</th>
-                  <th scope="col" class="sortable-header">Gate</th>
-                  <th scope="col" class="sortable-header">Direction</th>
-                  <th scope="col" class="sortable-header">Tag ID</th>
-                  <th scope="col">Matched to cycle</th>
-                  <th scope="col">Cycle status</th>
+                  <th scope="col" class="sortable-header">Reader point</th>
+                  <th scope="col" class="sortable-header">Truck</th>
+                  <th scope="col" class="sortable-header">Carrier</th>
+                  <th scope="col">Tag ID</th>
                 </tr>
               </thead>
               <tbody>
-                    <tr>
-                      <td>07 Sep</td>
-                      <td>14:31</td>
-                      <td class="cell-primary">HPC - Lanseria</td>
-                      <td><span class="direction"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Exit</span></td>
-                      <td>TRK-002</td>
-                      <td>Cycle 1094</td>
-                      <td><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">In progress</span></td>
-                    </tr>
-                    <tr>
-                      <td>07 Sep</td>
-                      <td>14:22</td>
-                      <td class="cell-primary">Dealership 2</td>
-                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-                      <td>TRK-001</td>
-                      <td>Cycle 1093</td>
-                      <td><span class="badge rounded-pill bg-warning-subtle text-warning-emphasis badge-dot">In progress</span></td>
-                    </tr>
-                    <tr>
-                      <td>07 Sep</td>
-                      <td>14:05</td>
-                      <td class="cell-primary">HPC - Lanseria</td>
-                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-                      <td>TRK-002</td>
-                      <td>Cycle 1092</td>
-                      <td><span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">Complete</span></td>
-                    </tr>
-                    <tr>
-                      <td>07 Sep</td>
-                      <td>13:01</td>
-                      <td class="cell-primary">HPC - Lanseria</td>
-                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-                      <td>TRK-001</td>
-                      <td>Cycle 1091</td>
-                      <td><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Breach</span></td>
-                    </tr>
-                    <tr>
-                      <td>07 Sep</td>
-                      <td>08:55</td>
-                      <td class="cell-primary">Dealership 2</td>
-                      <td><span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entry</span></td>
-                      <td>TRK-001</td>
-                      <td class="text-body-secondary">—</td>
-                      <td><span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Unmatched</span></td>
-                    </tr>
+                {% for e in events %}
+                <tr>
+                  <td>{{ e.scanned_at.strftime('%d %b') }}</td>
+                  <td>{{ e.scanned_at.strftime('%H:%M') }}</td>
+                  <td class="cell-primary">
+                    {% if e.location == 'GATE-IN' %}
+                      <span class="direction"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Gate in</span>
+                    {% elif e.location == 'GATE-OUT' %}
+                      <span class="direction"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Gate out</span>
+                    {% else %}
+                      <span class="direction"><i class="bi bi-box-seam" aria-hidden="true"></i>{{ e.location }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ e.truck_code }}</td>
+                  <td>{{ e.carrier }}</td>
+                  <td class="text-body-secondary small">{{ e.tag_epc }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">No scans recorded yet.</td></tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>

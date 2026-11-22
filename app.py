@@ -29,7 +29,7 @@ def alerts():
 
 @app.route("/gatelog")
 def gatelog():
-    return render_template("gatelog.html")
+    return render_template("gatelog.html", events=services.list_scan_events())
 
 @app.route("/reports")
 def reports():
