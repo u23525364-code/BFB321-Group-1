@@ -68,3 +68,41 @@ def list_scan_events(limit=100):
 
 def list_carriers():
     return query_all("SELECT id, name FROM carriers ORDER BY name")
+
+#  Reports: compliance by carrier or truck (Luka) 
+
+# The only groupings allowed: name -> (column to show, columns to group by)
+REPORT_GROUPS = {
+    "carrier": ("c.name", "c.id, c.name"),
+    "truck": ("t.truck_code", "t.id, t.truck_code"),
+}
+
+
+def compliance_by(group):
+    """Takt compliance per carrier or per truck, for finished deliveries only.
+
+    group: "carrier" or "truck".
+    Returns rows with: label, cycles, avg_minutes, within_takt, breaches, compliance_pct
+    compliance_pct = within_takt / cycles * 100 (same rule as takt_time.compliance_rate)
+    """
+    label_col, group_cols = REPORT_GROUPS[group]
+    takt = takt_time.TAKT_TIME_MINUTES
+    rows = query_all(f"""
+        SELECT {label_col} AS label,
+               COUNT(*) AS cycles,
+               AVG(TIMESTAMPDIFF(MINUTE, d.gate_in_at, d.gate_out_at)) AS avg_minutes,
+               SUM(TIMESTAMPDIFF(MINUTE, d.gate_in_at, d.gate_out_at) <= %s) AS within_takt,
+               SUM(TIMESTAMPDIFF(MINUTE, d.gate_in_at, d.gate_out_at) > %s) AS breaches
+        FROM deliveries d
+        JOIN trucks t ON t.id = d.truck_id
+        JOIN carriers c ON c.id = t.carrier_id
+        WHERE d.gate_out_at IS NOT NULL
+        GROUP BY {group_cols}
+        ORDER BY breaches DESC
+    """, (takt, takt))
+    for row in rows:
+        row["avg_minutes"] = float(row["avg_minutes"])
+        row["within_takt"] = int(row["within_takt"])
+        row["breaches"] = int(row["breaches"])
+        row["compliance_pct"] = row["within_takt"] / row["cycles"] * 100
+    return rows
