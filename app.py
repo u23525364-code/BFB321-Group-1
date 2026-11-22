@@ -11,7 +11,7 @@ import services
 from config import CONFIGS
 
 app = Flask(__name__)
-app_env = os.getenv("FLASK_ENV", "development")
+app_env = os.getenv("APP_ENV", "development")
 app.config.from_object(CONFIGS.get(app_env, CONFIGS["development"]))
 
 db.init_app(app)
