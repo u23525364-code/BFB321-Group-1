@@ -8,6 +8,7 @@ from flask import (Flask, flash, redirect, render_template,
 
 import db
 import services
+import api
 from config import CONFIGS
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ app_env = os.getenv("APP_ENV", "development")
 app.config.from_object(CONFIGS.get(app_env, CONFIGS["development"]))
 
 db.init_app(app)
+app.register_blueprint(api.bp)
 
 @app.route("/")
 def index():
