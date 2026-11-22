@@ -77,3 +77,19 @@ def deliveries():
     start = (page - 1) * size
     items = [_delivery_json(r) for r in rows[start:start + size]]
     return jsonify(page=page, size=size, total=total, items=items)
+
+@bp.get("/trucks")
+def trucks():
+    """All trucks with their carrier names."""
+    items = [
+        {
+            "id": row["id"],
+            "truck_code": row["truck_code"],
+            "tag_epc": row["tag_epc"],
+            "carrier_id": row["carrier_id"],
+            "carrier": row["carrier"],
+            "active": bool(row["active"]),
+        }
+        for row in services.list_trucks()
+    ]
+    return jsonify(total=len(items), items=items)

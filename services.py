@@ -106,3 +106,14 @@ def compliance_by(group):
         row["breaches"] = int(row["breaches"])
         row["compliance_pct"] = row["within_takt"] / row["cycles"] * 100
     return rows
+
+
+def list_trucks():
+    """All trucks with their carrier name, ordered by truck code."""
+    return query_all("""
+        SELECT t.id, t.truck_code, t.tag_epc, t.active,
+               c.id AS carrier_id, c.name AS carrier
+        FROM trucks t
+        JOIN carriers c ON c.id = t.carrier_id
+        ORDER BY t.truck_code
+    """)
