@@ -94,7 +94,7 @@
         </button>
         <div class="topbar-heading">
           <h1 class="page-title">Performance reporting</h1>
-          <p class="page-subtitle">Takt compliance by driver, route, location and time period</p>
+          <p class="page-subtitle">Takt compliance by carrier and truck </p>
         </div>
         <div class="topbar-meta">
           <span class="live-indicator d-none d-md-inline-flex"><span class="live-dot" aria-hidden="true"></span>Receiving scan data</span>
@@ -166,17 +166,17 @@
 
  
         <div class="row g-3">
-          <div class="col-12 col-xl-6">
+                   <div class="col-12 col-xl-6">
             <section class="card h-100">
               <header class="card-header">
-                <h2 class="card-title">Compliance by driver</h2>
+                <h2 class="card-title">Compliance by carrier</h2>
               </header>
               <div class="table-responsive">
-                <table class="table table-hw table-hover align-middle" id="driverTable">
-                  <caption class="visually-hidden">Takt compliance by driver, last 30 days</caption>
+                <table class="table table-hw table-hover align-middle" id="carrierTable">
+                  <caption class="visually-hidden">Takt compliance by carrier, finished deliveries</caption>
                   <thead>
                     <tr>
-                      <th scope="col" class="sortable-header">Driver</th>
+                      <th scope="col" class="sortable-header">Carrier</th>
                       <th scope="col" class="sortable-header text-end">Cycles</th>
                       <th scope="col" class="sortable-header text-end">Avg time</th>
                       <th scope="col" class="sortable-header text-end">Within takt</th>
@@ -184,9 +184,17 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td class="cell-primary">Driver A</td><td class="text-end">88</td><td class="text-end">84 min</td><td class="text-end cell-primary">72%</td><td class="text-end">25</td></tr>
-                    <tr><td class="cell-primary">Driver B</td><td class="text-end">84</td><td class="text-end">76 min</td><td class="text-end cell-primary">83%</td><td class="text-end">14</td></tr>
-                    <tr><td class="cell-primary">Driver C</td><td class="text-end">75</td><td class="text-end">89 min</td><td class="text-end cell-primary">65%</td><td class="text-end">23</td></tr>
+                    {% for row in by_carrier %}
+                    <tr>
+                      <td class="cell-primary">{{ row.label }}</td>
+                      <td class="text-end">{{ row.cycles }}</td>
+                      <td class="text-end">{{ '%.0f'|format(row.avg_minutes) }} min</td>
+                      <td class="text-end cell-primary">{{ '%.0f'|format(row.compliance_pct) }}%</td>
+                      <td class="text-end">{{ row.breaches }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">No finished deliveries yet.</td></tr>
+                    {% endfor %}
                   </tbody>
                 </table>
               </div>
@@ -195,29 +203,37 @@
           <div class="col-12 col-xl-6">
             <section class="card h-100">
               <header class="card-header">
-                <h2 class="card-title">Compliance by route</h2>
+                <h2 class="card-title">Compliance by truck</h2>
               </header>
               <div class="table-responsive">
-                <table class="table table-hw table-hover align-middle" id="routeTable">
-                  <caption class="visually-hidden">Takt compliance by route, last 30 days</caption>
+                <table class="table table-hw table-hover align-middle" id="truckTable">
+                  <caption class="visually-hidden">Takt compliance by truck, finished deliveries</caption>
                   <thead>
                     <tr>
-                      <th scope="col" class="sortable-header">Route</th>
+                      <th scope="col" class="sortable-header">Truck</th>
                       <th scope="col" class="sortable-header text-end">Cycles</th>
                       <th scope="col" class="sortable-header text-end">Avg time</th>
                       <th scope="col" class="sortable-header text-end">Within takt</th>
+                      <th scope="col" class="sortable-header text-end">Breaches</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td class="cell-primary">HPC → Dealership 1</td><td class="text-end">62</td><td class="text-end">71 min</td><td class="text-end cell-primary">89%</td></tr>
-                    <tr><td class="cell-primary">HPC → Dealership 2</td><td class="text-end">58</td><td class="text-end">79 min</td><td class="text-end cell-primary">81%</td></tr>
-                    <tr><td class="cell-primary">HPC → Dealership 3</td><td class="text-end">64</td><td class="text-end">88 min</td><td class="text-end cell-primary">66%</td></tr>
-                    <tr><td class="cell-primary">HPC → Dealership 4</td><td class="text-end">63</td><td class="text-end">94 min</td><td class="text-end"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">58%</span></td></tr>
+                    {% for row in by_truck %}
+                    <tr>
+                      <td class="cell-primary">{{ row.label }}</td>
+                      <td class="text-end">{{ row.cycles }}</td>
+                      <td class="text-end">{{ '%.0f'|format(row.avg_minutes) }} min</td>
+                      <td class="text-end cell-primary">{{ '%.0f'|format(row.compliance_pct) }}%</td>
+                      <td class="text-end">{{ row.breaches }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">No finished deliveries yet.</td></tr>
+                    {% endfor %}
                   </tbody>
                 </table>
               </div>
             </section>
-          </div>
+          </div> 
         </div>
 
         <div class="design-note" role="note">

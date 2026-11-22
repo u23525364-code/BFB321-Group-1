@@ -41,7 +41,9 @@ def gatelog():
 
 @app.route("/reports")
 def reports():
-    return render_template("reports.html")
+    return render_template("reports.html",
+                           by_carrier=services.compliance_by("carrier"),
+                           by_truck=services.compliance_by("truck"))
 
 @app.route("/capacity")
 def capacity():
