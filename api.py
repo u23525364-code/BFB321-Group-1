@@ -35,6 +35,7 @@ def _delivery_json(row):
         "gate_out_at": _iso(row["gate_out_at"]),
         "turnaround_min": row["turnaround_min"],
         "status": row["status"],
+        "exception_note": row["exception_note"],
     }
 
 
@@ -77,6 +78,14 @@ def deliveries():
     start = (page - 1) * size
     items = [_delivery_json(r) for r in rows[start:start + size]]
     return jsonify(page=page, size=size, total=total, items=items)
+
+@bp.get("/deliveries/<int:delivery_id>")
+def delivery_detail(delivery_id):
+    """One delivery by its id; 404 if it does not exist."""
+    row = services.get_delivery(delivery_id)
+    if row is None:
+        return jsonify(error="Delivery not found."), 404
+    return jsonify(_delivery_json(row))
 
 @bp.get("/trucks")
 def trucks():
