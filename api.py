@@ -87,6 +87,20 @@ def delivery_detail(delivery_id):
         return jsonify(error="Delivery not found."), 404
     return jsonify(_delivery_json(row))
 
+@bp.patch("/deliveries/<int:delivery_id>")
+def delivery_update(delivery_id):
+    """Log an exception note on a delivery. Body: {"exception_note": "..."}."""
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict) or not isinstance(body.get("exception_note"), str):
+        return jsonify(error='Send JSON like {"exception_note": "Dock not ready"}.'), 400
+    if services.get_delivery(delivery_id) is None:
+        return jsonify(error="Delivery not found."), 404
+    ok, message = services.update_delivery_note(delivery_id, body["exception_note"])
+    if not ok:
+        return jsonify(error=message), 400
+    return jsonify(message=message,
+                   delivery=_delivery_json(services.get_delivery(delivery_id)))
+
 @bp.get("/trucks")
 def trucks():
     """All trucks with their carrier names."""
