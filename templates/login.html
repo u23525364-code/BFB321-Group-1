@@ -42,10 +42,10 @@
 
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div class="form-check mb-0">
-                <input type="checkbox" class="form-check-input" id="rememberMe">
+                <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
                 <label class="form-check-label small" for="rememberMe">Keep me signed in</label>
               </div>
-              <a href="#" class="small text-decoration-none">Forgotten password?</a>
+              <span class="small text-body-secondary">Forgotten password? Ask your administrator.</span>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 py-2">Sign in</button>
@@ -55,7 +55,7 @@
 
       <div class="design-note" role="note">
         <i class="bi bi-info-circle" aria-hidden="true"></i>
-        <span>Access is granted by role: Manager (full access), Supervisor (live view and alerts), Administrator (user and gate configuration). Drivers do not require accounts, as no data is captured from them.</span>
+        <span>Demo build: one Manager account (credentials in the README). In production, Supervisor and Administrator roles would be added. Drivers need no accounts, as no data is captured from them.</span>
       </div>
     </div>
   </main>
@@ -64,5 +64,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../static/js/dashboard.js"></script>
+
+    <script>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    showToast({{ message|tojson }});
+    {% endfor %}
+  </script>
+
 </body>
 </html>
