@@ -110,7 +110,19 @@ def delivery_exception(delivery_id):
 
 @app.route("/gatelog")
 def gatelog():
-    return render_template("gatelog.html", events=services.list_scan_events())
+    return render_template("gatelog.html", events=services.list_scan_events(),
+                           trucks=services.list_trucks(),
+                           locations=services.SCAN_LOCATIONS)
+
+@app.route("/scans", methods=["POST"])
+def scan_create():
+    """Create flow (Class 5 slides 63-66): record one RFID gate scan."""
+    ok, message, delivery_id = services.record_scan(
+        request.form.get("truck_code"),
+        request.form.get("location"),
+        request.form.get("reader_id"))
+    flash(message, "success" if ok else "error")
+    return redirect(url_for("gatelog"))
 
 @app.route("/reports")
 def reports():
