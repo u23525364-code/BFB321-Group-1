@@ -235,46 +235,98 @@ def compliance_by_day():
             for r in rows]
 
 
-# Class 5 slide 46 (restock list) and slide 31 (GROUP BY)
 
-REASON_CODES = [
-    "Dock not ready",
-    "Waiting for paperwork",
-    "Loading delay at HPC",
-    "Carrier arrived late",
-    "Vehicle not ready",
-    "Other",
-]
+NOTE_MAX_LENGTH = 255
+SCAN_LOCATIONS = ("GATE-IN", "DOCK-A", "DOCK-B", "GATE-OUT")
 
 
-def breach_alerts():
-    breaches = [d for d in list_deliveries() if d["badge"] == "danger"]
-    for d in breaches:
-        d["over_by"] = d["turnaround_min"] - int(takt_time.TAKT_TIME_MINUTES)
-    new = [d for d in breaches if not d["exception_note"]]
-    coded = [d for d in breaches if d["exception_note"]]
-    by_reason = {}
-    for d in coded:
-        by_reason[d["exception_note"]] = by_reason.get(d["exception_note"], 0) + 1
-    by_reason = sorted(by_reason.items(), key=lambda item: item[1], reverse=True)
-    return dict(new=new, coded=coded, by_reason=by_reason, total=len(breaches))
+def get_delivery(delivery_id):
+    row = query_one(DELIVERY_SELECT + " WHERE d.id = %s", (delivery_id,))
+    if row is None:
+        return None
+    return _add_status([row])[0]
 
 
-def report_summary():
-    finished = [d["turnaround_min"] for d in list_deliveries()
-                if d["turnaround_min"] is not None]
-    return takt_time.summarise_cycles(finished)
+def validate_note(note):
+    note = (note or "").strip()
+    if not note:
+        return note, "Exception note is required."
+    if len(note) > NOTE_MAX_LENGTH:
+        return note, f"Exception note must be {NOTE_MAX_LENGTH} characters or fewer."
+    return note, None
 
 
-def compliance_by_day():
-    rows = query_all("""
-        SELECT DATE(gate_in_at) AS day, COUNT(*) AS cycles,
-               SUM(TIMESTAMPDIFF(MINUTE, gate_in_at, gate_out_at) <= %s) AS within_takt
-        FROM deliveries
-        WHERE gate_out_at IS NOT NULL
-        GROUP BY DATE(gate_in_at)
-        ORDER BY day
-    """, (takt_time.TAKT_TIME_MINUTES,))
-    return [dict(label=r["day"].strftime("%d %b"),
-                 pct=round(float(r["within_takt"]) / r["cycles"] * 100, 1))
-            for r in rows]
+def update_delivery_note(delivery_id, note):
+    note, error = validate_note(note)
+    if error:
+        return False, error
+    delivery = get_delivery(delivery_id)
+    if delivery is None:
+        return False, "Delivery not found."
+    execute("UPDATE deliveries SET exception_note = %s WHERE id = %s",
+            (note, delivery_id))
+    return True, f"Exception logged for {delivery['delivery_code']}."
+
+
+def record_scan(truck_code, location_code, reader_id):
+    truck_code = (truck_code or "").strip().upper()
+    location_code = (location_code or "").strip().upper()
+    reader_id = (reader_id or "").strip()
+    if not truck_code or not location_code or not reader_id:
+        return False, "Truck, location and reader are all required.", None
+    if location_code not in SCAN_LOCATIONS:
+        return False, (f"Unknown location '{location_code}'. "
+                       f"Use one of: {', '.join(SCAN_LOCATIONS)}."), None
+
+    now = datetime.now().replace(microsecond=0)
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("SELECT id, active FROM trucks WHERE truck_code = %s",
+                        (truck_code,))
+            truck = cur.fetchone()
+            if truck is None or not truck["active"]:
+                db.rollback()
+                return False, f"Unknown or inactive truck '{truck_code}'.", None
+            cur.execute("SELECT id FROM locations WHERE code = %s", (location_code,))
+            location = cur.fetchone()
+            cur.execute("SELECT id, delivery_code FROM deliveries "
+                        "WHERE truck_id = %s AND status = 'open' "
+                        "ORDER BY gate_in_at DESC LIMIT 1 FOR UPDATE", (truck["id"],))
+            visit = cur.fetchone()
+
+            
+            if location_code == "GATE-IN" and visit:
+                db.rollback()
+                return False, f"{truck_code} is already on site ({visit['delivery_code']}).", None
+            if location_code != "GATE-IN" and visit is None:
+                db.rollback()
+                return False, f"{truck_code} is not on site. Scan GATE-IN first.", None
+
+            
+            cur.execute("INSERT INTO scan_events (truck_id, location_id, reader_id, scanned_at) "
+                        "VALUES (%s, %s, %s, %s)",
+                        (truck["id"], location["id"], reader_id, now))
+            if location_code == "GATE-IN":
+                cur.execute("SELECT COALESCE(MAX(id), 0) + 1 AS n FROM deliveries")
+                code = f"DEL-{cur.fetchone()['n']:04d}"
+                cur.execute("INSERT INTO deliveries (delivery_code, truck_id, gate_in_at, status) "
+                            "VALUES (%s, %s, %s, 'open')", (code, truck["id"], now))
+                delivery_id = cur.lastrowid
+                message = f"{truck_code} gated in. {code} opened."
+            elif location_code == "GATE-OUT":
+                cur.execute("UPDATE deliveries SET gate_out_at = %s, status = 'closed' "
+                            "WHERE id = %s", (now, visit["id"]))
+                delivery_id = visit["id"]
+                message = f"{truck_code} gated out. {visit['delivery_code']} closed."
+            else:
+                cur.execute("UPDATE deliveries SET dock_location_id = %s, "
+                            "dock_arrival_at = COALESCE(dock_arrival_at, %s) WHERE id = %s",
+                            (location["id"], now, visit["id"]))
+                delivery_id = visit["id"]
+                message = f"{truck_code} arrived at {location_code} ({visit['delivery_code']})."
+        db.commit()  
+        return True, message, delivery_id
+    except Exception:
+        db.rollback()  
+        raise
