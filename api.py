@@ -3,8 +3,11 @@ from flask import Blueprint, jsonify, request
 
 import services
 
+import logging
+
 # Every route in this file starts with /api
 bp = Blueprint("api", __name__, url_prefix="/api")
+log = logging.getLogger("hpc")
 
 
 @bp.get("/kpis")
@@ -100,6 +103,23 @@ def delivery_update(delivery_id):
         return jsonify(error=message), 400
     return jsonify(message=message,
                    delivery=_delivery_json(services.get_delivery(delivery_id)))
+
+@bp.post("/scan-events")
+def scan_create():
+    """Record one RFID scan. Body: {"truck_code": "TRK-02", "location": "GATE-IN", "reader_id": "hpc-reader-01"}."""
+    body = request.get_json(silent=True)
+    fields = ("truck_code", "location", "reader_id")
+    if not isinstance(body, dict) or not all(isinstance(body.get(f), str) for f in fields):
+        return jsonify(error='Send JSON like {"truck_code": "TRK-02", "location": "GATE-IN", '
+                             '"reader_id": "hpc-reader-01"}.'), 400
+    log.info("Scan received: %s at %s from %s",
+             body["truck_code"], body["location"], body["reader_id"])
+    ok, message, delivery_id = services.record_scan(
+        body["truck_code"], body["location"], body["reader_id"])
+    if not ok:
+        return jsonify(error=message), 400
+    return jsonify(message=message,
+                   delivery=_delivery_json(services.get_delivery(delivery_id))), 201
 
 @bp.get("/trucks")
 def trucks():
