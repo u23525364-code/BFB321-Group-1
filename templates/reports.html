@@ -49,7 +49,7 @@
               <a class="nav-link sidebar-link" href="{{ url_for('alerts') }}">
                 <i class="bi bi-bell" aria-hidden="true"></i>
                 <span>Breach alerts</span>
-                <span class="badge rounded-pill text-bg-danger ms-auto">4<span class="visually-hidden"> new</span></span>
+                <span class="badge rounded-pill text-bg-danger ms-auto">{{ alert_count }}<span class="visually-hidden"> new</span></span>
               </a>
             </li>
             <li class="nav-item">
@@ -152,12 +152,13 @@
                 <h2 class="card-title">Summary</h2>
               </header>
               <div class="card-body">
-                <ul class="stat-list">
-                  <li><span class="stat-label">Total cycles</span><span class="stat-value">247</span></li>
-                  <li><span class="stat-label">Within takt</span><span class="d-flex align-items-center gap-2"><span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">75%</span><span class="stat-value">185</span></span></li>
-                  <li><span class="stat-label">Breached</span><span class="d-flex align-items-center gap-2"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">25%</span><span class="stat-value">62</span></span></li>
-                  <li><span class="stat-label">Average cycle time</span><span class="stat-value">81 min</span></li>
-                  <li><span class="stat-label">Longest cycle</span><span class="stat-value text-danger"><i class="bi bi-exclamation-triangle me-1" role="img" aria-label="Over target"></i>134 min</span></li>
+                                <ul class="stat-list">
+                  {% set within = summary.count - summary.breaches %}
+                  <li><span class="stat-label">Total cycles</span><span class="stat-value">{{ summary.count }}</span></li>
+                  <li><span class="stat-label">Within takt</span><span class="d-flex align-items-center gap-2"><span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">{{ '%.0f'|format(summary.compliance_pct or 0) }}%</span><span class="stat-value">{{ within }}</span></span></li>
+                  <li><span class="stat-label">Breached</span><span class="d-flex align-items-center gap-2"><span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">{{ '%.0f'|format(100 - (summary.compliance_pct or 100)) }}%</span><span class="stat-value">{{ summary.breaches }}</span></span></li>
+                  <li><span class="stat-label">Average cycle time</span><span class="stat-value">{{ '%.0f'|format(summary.average_minutes or 0) }} min</span></li>
+                  <li><span class="stat-label">Longest cycle</span><span class="stat-value text-danger"><i class="bi bi-exclamation-triangle me-1" role="img" aria-label="Over target"></i>{{ summary.max_minutes or 0 }} min</span></li>
                 </ul>
               </div>
             </section>
@@ -253,10 +254,10 @@
     new Chart(document.getElementById('complianceChart'), {
       type: 'bar',
       data: {
-        labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11'],
+                labels: {{ days | map(attribute='label') | list | tojson }},
         datasets: [{
           label: 'Takt compliance',
-          data: [65, 60, 75, 70, 80, 78, 88, 82, 85, 80, 83],
+          data: {{ days | map(attribute='pct') | list | tojson }},
           backgroundColor: cssVar('--chart-1'),
           borderRadius: 4,
           maxBarThickness: 36
