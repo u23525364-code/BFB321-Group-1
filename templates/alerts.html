@@ -49,7 +49,7 @@
               <a class="nav-link sidebar-link active" href="{{ url_for('alerts') }}" aria-current="page">
                 <i class="bi bi-bell" aria-hidden="true"></i>
                 <span>Breach alerts</span>
-                <span class="badge rounded-pill text-bg-danger ms-auto">4<span class="visually-hidden"> new</span></span>
+                <span class="badge rounded-pill text-bg-danger ms-auto">{{ alert_count }}<span class="visually-hidden"> new</span></span>
               </a>
             </li>
             <li class="nav-item">
@@ -102,12 +102,11 @@
         </div>
       </header>
 
-      <main class="app-content" id="main-content" tabindex="-1">
+            <main class="app-content" id="main-content" tabindex="-1">
 
         <div class="segmented nav mb-3" role="tablist" aria-label="Filter alerts">
-          <button type="button" class="btn active" id="tab-new" data-bs-toggle="pill" data-bs-target="#pane-new" role="tab" aria-controls="pane-new" aria-selected="true">New<span class="count">4</span></button>
-          <button type="button" class="btn" id="tab-ack" data-bs-toggle="pill" data-bs-target="#pane-ack" role="tab" aria-controls="pane-ack" aria-selected="false">Acknowledged<span class="count">6</span></button>
-          <button type="button" class="btn" id="tab-resolved" data-bs-toggle="pill" data-bs-target="#pane-resolved" role="tab" aria-controls="pane-resolved" aria-selected="false">Resolved<span class="count">52</span></button>
+          <button type="button" class="btn active" id="tab-new" data-bs-toggle="pill" data-bs-target="#pane-new" role="tab" aria-controls="pane-new" aria-selected="true">Awaiting reason<span class="count">{{ alerts.new|length }}</span></button>
+          <button type="button" class="btn" id="tab-coded" data-bs-toggle="pill" data-bs-target="#pane-coded" role="tab" aria-controls="pane-coded" aria-selected="false">Reason logged<span class="count">{{ alerts.coded|length }}</span></button>
         </div>
 
         <div class="row g-3">
@@ -118,276 +117,94 @@
                 <section class="card">
                   <header class="card-header">
                     <div>
-                      <h2 class="card-title">Breaches awaiting review</h2>
-                      <p class="card-subtitle">Newest first</p>
+                      <h2 class="card-title">Breaches awaiting a reason</h2>
+                      <p class="card-subtitle">Turnaround over the 90 min takt, newest first</p>
                     </div>
                   </header>
                   <div class="list-group list-group-flush">
+                    {% for d in alerts.new %}
                     <article class="list-group-item d-flex gap-3">
                       <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
                       <div class="feed-body">
                         <div class="d-flex justify-content-between align-items-start gap-2">
                           <div>
-                            <h3 class="feed-title">Driver A · HPC → Dealership 1</h3>
-                            <div class="feed-meta">Today 12:51 · Cycle time 101 min · over takt by +11 min</div>
+                            <h3 class="feed-title">{{ d.delivery_code }} · {{ d.truck_code }} · {{ d.carrier }}</h3>
+                            <div class="feed-meta">{{ d.gate_in_at.strftime('%a %d %b %H:%M') }} · {{ d.dock or 'No dock' }} · Turnaround {{ d.turnaround_min }} min · over takt by +{{ d.over_by }} min</div>
                           </div>
                           <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Breach</span>
                         </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-primary" data-acknowledge>Acknowledge</button>
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-                        </div>
+                        <form method="post" action="{{ url_for('delivery_exception', delivery_id=d.id) }}" class="d-flex flex-wrap gap-2 mt-3">
+                          <label class="visually-hidden" for="reason-{{ d.id }}">Reason for {{ d.delivery_code }}</label>
+                          <select class="form-select form-select-sm w-auto" id="reason-{{ d.id }}" name="reason" required>
+                            <option value="" selected disabled>Select a reason...</option>
+                            {% for r in reasons %}
+                            <option value="{{ r }}">{{ r }}</option>
+                            {% endfor %}
+                          </select>
+                          <button type="submit" class="btn btn-sm btn-primary">Save reason</button>
+                        </form>
                       </div>
                     </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver B · HPC → Dealership 4</h3>
-                            <div class="feed-meta">Today 11:20 · Cycle time 94 min · over takt by +4 min</div>
-                          </div>
-                          <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Breach</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-primary" data-acknowledge>Acknowledge</button>
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-                        </div>
-                      </div>
-                    </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver C · HPC → Dealership 3</h3>
-                            <div class="feed-meta">Yesterday 15:07 · Cycle time 118 min · over takt by +28 min</div>
-                          </div>
-                          <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Breach</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-primary" data-acknowledge>Acknowledge</button>
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-                        </div>
-                      </div>
-                    </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver A · HPC → Dealership 4</h3>
-                            <div class="feed-meta">Yesterday 09:42 · Cycle time 97 min · over takt by +7 min</div>
-                          </div>
-                          <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis badge-dot">Breach</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-primary" data-acknowledge>Acknowledge</button>
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-                        </div>
-                      </div>
-                    </article>
+                    {% else %}
+                    <div class="list-group-item">No breaches waiting for a reason.</div>
+                    {% endfor %}
                   </div>
                 </section>
               </div>
-              <div class="tab-pane fade" id="pane-ack" role="tabpanel" aria-labelledby="tab-ack">
+              <div class="tab-pane fade" id="pane-coded" role="tabpanel" aria-labelledby="tab-coded">
                 <section class="card">
                   <header class="card-header">
                     <div>
-                      <h2 class="card-title">Acknowledged breaches</h2>
-                      <p class="card-subtitle">Seen by management, reason code still to add</p>
+                      <h2 class="card-title">Breaches with a reason logged</h2>
+                      <p class="card-subtitle">Reviewed by management</p>
                     </div>
                   </header>
                   <div class="list-group list-group-flush">
+                    {% for d in alerts.coded %}
                     <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon feed-icon-none"><i class="bi bi-eye" aria-hidden="true"></i></span>
+                      <span class="feed-icon feed-icon-none"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
                       <div class="feed-body">
                         <div class="d-flex justify-content-between align-items-start gap-2">
                           <div>
-                            <h3 class="feed-title">Driver C · HPC → Dealership 2</h3>
-                            <div class="feed-meta">Fri 04 Sep 14:36 · Cycle time 103 min · over takt by +13 min</div>
+                            <h3 class="feed-title">{{ d.delivery_code }} · {{ d.truck_code }} · {{ d.carrier }}</h3>
+                            <div class="feed-meta">{{ d.gate_in_at.strftime('%a %d %b %H:%M') }} · Turnaround {{ d.turnaround_min }} min · Reason: <strong>{{ d.exception_note }}</strong></div>
                           </div>
-                          <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Acknowledged</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
+                          <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Reason logged</span>
                         </div>
                       </div>
                     </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon feed-icon-none"><i class="bi bi-eye" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver B · HPC → Dealership 3</h3>
-                            <div class="feed-meta">Fri 04 Sep 10:12 · Cycle time 96 min · over takt by +6 min</div>
-                          </div>
-                          <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Acknowledged</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-                        </div>
-                      </div>
-                    </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon feed-icon-none"><i class="bi bi-eye" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver A · HPC → Dealership 4</h3>
-                            <div class="feed-meta">Thu 03 Sep 15:48 · Cycle time 109 min · over takt by +19 min</div>
-                          </div>
-                          <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis badge-dot">Acknowledged</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Add reason code</button>
-                        </div>
-                      </div>
-                    </article>
+                    {% else %}
+                    <div class="list-group-item">No reasons logged yet.</div>
+                    {% endfor %}
                   </div>
-                  <footer class="card-footer">
-                    <span>Showing the 3 latest of 6</span>
-                  </footer>
-                </section>
-              </div>
-              <div class="tab-pane fade" id="pane-resolved" role="tabpanel" aria-labelledby="tab-resolved">
-                <section class="card">
-                  <header class="card-header">
-                    <div>
-                      <h2 class="card-title">Resolved breaches</h2>
-                      <p class="card-subtitle">Reason code recorded</p>
-                    </div>
-                  </header>
-                  <div class="list-group list-group-flush">
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon feed-icon-ok"><i class="bi bi-check-circle" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver A · HPC → Dealership 3</h3>
-                            <div class="feed-meta">Thu 03 Sep 11:30 · Cycle time 99 min · over takt by +9 min · Reason: Traffic congestion</div>
-                          </div>
-                          <span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">Resolved</span>
-                        </div>
-                      </div>
-                    </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon feed-icon-ok"><i class="bi bi-check-circle" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver C · HPC → Dealership 1</h3>
-                            <div class="feed-meta">Wed 02 Sep 16:05 · Cycle time 92 min · over takt by +2 min · Reason: Dealership delay</div>
-                          </div>
-                          <span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">Resolved</span>
-                        </div>
-                      </div>
-                    </article>
-                    <article class="list-group-item d-flex gap-3">
-                      <span class="feed-icon feed-icon-ok"><i class="bi bi-check-circle" aria-hidden="true"></i></span>
-                      <div class="feed-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                          <div>
-                            <h3 class="feed-title">Driver B · HPC → Dealership 4</h3>
-                            <div class="feed-meta">Wed 02 Sep 09:54 · Cycle time 105 min · over takt by +15 min · Reason: HPC loading delay</div>
-                          </div>
-                          <span class="badge rounded-pill bg-success-subtle text-success-emphasis badge-dot">Resolved</span>
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                  <footer class="card-footer">
-                    <span>Showing the 3 latest of 52</span>
-                  </footer>
                 </section>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-xl-4 d-flex flex-column gap-3">
-            <section class="card">
-              <header class="card-header">
-                <h2 class="card-title">Alert settings</h2>
-              </header>
-              <form class="card-body needs-validation" novalidate data-success="Alert settings saved.">
-                <div class="row g-3 mb-3">
-                  <div class="col-6">
-                    <label class="form-label" for="taktTarget">Takt target (min)</label>
-                    <input type="number" class="form-control form-control-sm" id="taktTarget" value="90" min="1" max="600" step="1" required>
-                    <div class="invalid-feedback">Enter 1 to 600 minutes.</div>
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label" for="warnAt">Warn at (% of takt)</label>
-                    <input type="number" class="form-control form-control-sm" id="warnAt" value="80" min="1" max="99" step="1" required aria-describedby="warnAtHelp">
-                    <div class="invalid-feedback">Enter 1 to 99%.</div>
-                  </div>
-                  <div class="col-12 form-text mt-1" id="warnAtHelp">A cycle shows as "At risk" once it has used this share of the takt time.</div>
-                </div>
-                <fieldset class="mb-3">
-                  <legend class="form-label fs-6">Notify by</legend>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" checked id="c1"><label class="form-check-label small" for="c1">On-screen</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" checked id="c2"><label class="form-check-label small" for="c2">Email</label>
-                  </div>
-                </fieldset>
-                <button type="submit" class="btn btn-sm btn-primary w-100">Save settings</button>
-              </form>
-            </section>
-
+          <div class="col-12 col-xl-4">
             <section class="card">
               <header class="card-header">
                 <div>
-                  <h2 class="card-title">Breaches this week</h2>
-                  <p class="card-subtitle">By cause</p>
+                  <h2 class="card-title">Breaches by cause</h2>
+                  <p class="card-subtitle">{{ alerts.total }} breaches in total</p>
                 </div>
               </header>
               <div class="card-body">
-                <div class="d-flex justify-content-between small"><span>Not yet coded</span><span class="stat-value">8</span></div>
-                <div class="progress progress-xs mt-2 mb-3" role="progressbar" aria-label="Not yet coded: 8 breaches" aria-valuenow="8" aria-valuemin="0" aria-valuemax="10"><div class="progress-bar bg-chart-1" style="width: 80%;"></div></div>
-                <div class="d-flex justify-content-between small"><span>Traffic delay</span><span class="stat-value">5</span></div>
-                <div class="progress progress-xs mt-2 mb-3" role="progressbar" aria-label="Traffic delay: 5 breaches" aria-valuenow="5" aria-valuemin="0" aria-valuemax="10"><div class="progress-bar bg-chart-3" style="width: 50%;"></div></div>
-                <div class="d-flex justify-content-between small"><span>Waiting at dealership</span><span class="stat-value">4</span></div>
-                <div class="progress progress-xs mt-2 mb-3" role="progressbar" aria-label="Waiting at dealership: 4 breaches" aria-valuenow="4" aria-valuemin="0" aria-valuemax="10"><div class="progress-bar bg-chart-3" style="width: 40%;"></div></div>
-                <div class="d-flex justify-content-between small"><span>Loading delay at HPC</span><span class="stat-value">2</span></div>
-                <div class="progress progress-xs mt-2" role="progressbar" aria-label="Loading delay at HPC: 2 breaches" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10"><div class="progress-bar bg-chart-3" style="width: 20%;"></div></div>
+                <div class="d-flex justify-content-between small"><span>Not yet coded</span><span class="stat-value">{{ alerts.new|length }}</span></div>
+                <div class="progress progress-xs mt-2 mb-3" role="progressbar" aria-label="Not yet coded: {{ alerts.new|length }} breaches" aria-valuenow="{{ alerts.new|length }}" aria-valuemin="0" aria-valuemax="{{ alerts.total }}"><div class="progress-bar bg-chart-1" style="width: {{ (alerts.new|length / alerts.total * 100)|round|int if alerts.total else 0 }}%;"></div></div>
+                {% for reason, count in alerts.by_reason %}
+                <div class="d-flex justify-content-between small"><span>{{ reason }}</span><span class="stat-value">{{ count }}</span></div>
+                <div class="progress progress-xs mt-2 mb-3" role="progressbar" aria-label="{{ reason }}: {{ count }} breaches" aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="{{ alerts.total }}"><div class="progress-bar bg-chart-3" style="width: {{ (count / alerts.total * 100)|round|int }}%;"></div></div>
+                {% endfor %}
               </div>
             </section>
-          </div>
-        </div>
-
-        <div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h2 class="modal-title" id="reasonModalLabel">Assign exception reason code</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <form class="needs-validation" novalidate data-success="Reason code saved.">
-                <div class="modal-body">
-                  <label class="form-label" for="reasonCode">Reason code</label>
-                  <select class="form-select" id="reasonCode" required>
-                    <option value="" selected disabled>Select a reason code...</option>
-                    <option value="traffic">Traffic congestion</option>
-                    <option value="dealership_wait">Dealership delay</option>
-                    <option value="hpc_loading">HPC loading delay</option>
-                    <option value="weather">Weather conditions</option>
-                  </select>
-                  <div class="invalid-feedback">Please select a reason code.</div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-              </form>
-            </div>
           </div>
         </div>
 
         <div class="design-note" role="note">
           <i class="bi bi-info-circle" aria-hidden="true"></i>
-          <p class="mb-0">A breach is detected and raised automatically. The only manual input anywhere in the system is the reason code entered here by management after the event.</p>
+          <p class="mb-0">A breach is detected and raised automatically from the RFID gate scans. The only manual input anywhere in the system is the reason code entered here by management after the event.</p>
         </div>
       </main>
     </div>
@@ -398,13 +215,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../static/js/dashboard.js"></script>
   <script>
-    document.querySelectorAll('[data-acknowledge]').forEach(button => {
-      button.addEventListener('click', () => {
-        button.textContent = 'Acknowledged';
-        button.disabled = true;
-        showToast('Breach acknowledged.');
-      });
-    });
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    showToast({{ message|tojson }});
+    {% endfor %}
   </script>
 </body>
 </html>

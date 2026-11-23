@@ -86,9 +86,27 @@ def live():
                            stats=services.dashboard_stats(),
                            search=search, carrier_id=carrier_id)
 
+@app.context_processor
+def inject_alert_count():
+    """Number of breaches still waiting for a reason, for the sidebar badge."""
+    return dict(alert_count=len(services.breach_alerts()["new"]))
+
+
 @app.route("/alerts")
 def alerts():
-    return render_template("alerts.html")
+    return render_template("alerts.html", alerts=services.breach_alerts(),
+                           reasons=services.REASON_CODES)
+
+
+@app.route("/deliveries/<int:delivery_id>/exception", methods=["POST"])
+def delivery_exception(delivery_id):
+    """Update flow (Class 5 slides 53-56): save a reason code on a breached delivery."""
+    if services.get_delivery(delivery_id) is None:
+        flash("Delivery not found.", "error")
+        return redirect(url_for("alerts"))
+    ok, message = services.update_delivery_note(delivery_id, request.form.get("reason"))
+    flash(message, "success" if ok else "error")
+    return redirect(url_for("alerts"))
 
 @app.route("/gatelog")
 def gatelog():
@@ -98,7 +116,9 @@ def gatelog():
 def reports():
     return render_template("reports.html",
                            by_carrier=services.compliance_by("carrier"),
-                           by_truck=services.compliance_by("truck"))
+                           by_truck=services.compliance_by("truck"),
+                           summary=services.report_summary(),
+                           days=services.compliance_by_day())
 
 @app.route("/capacity")
 def capacity():

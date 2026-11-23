@@ -1,8 +1,7 @@
 #Lecture Slides Class 5 pg 42: Edits = takt_status instead of stock_status, PRODUCT_SELECT becomes DELIVERY_SELECT etc., added list_scan_events function, added list_deliveries function, changed the name of the file to services.py instead of models.py as claude pointed out that the folder is already named models,
 import math
-
-
-from db import query_all, query_one
+from datetime import datetime
+from db import query_all, query_one, execute, get_db
 from models import takt_time, capacity
 
 def takt_status(turnaround_min):
@@ -22,7 +21,8 @@ def _add_status(rows):
 
 DELIVERY_SELECT = """
 SELECT d.id, d.delivery_code, t.truck_code, c.name AS carrier,
-       l.code AS dock, d.gate_in_at, d.gate_out_at,
+        
+         l.code AS dock, d.gate_in_at, d.gate_out_at, d.exception_note,
        TIMESTAMPDIFF(MINUTE, d.gate_in_at, d.gate_out_at) AS turnaround_min
 FROM deliveries d
 JOIN trucks t ON t.id = d.truck_id
@@ -191,3 +191,90 @@ def run_capacity_scenario(values):
     result["drivers_required_now"] = capacity.drivers_required(
         values["baseline"], values["cycle"], shift_minutes, utilisation)
     return result
+
+REASON_CODES = [
+    "Dock not ready",
+    "Waiting for paperwork",
+    "Loading delay at HPC",
+    "Carrier arrived late",
+    "Vehicle not ready",
+    "Other",
+]
+
+
+def breach_alerts():
+    breaches = [d for d in list_deliveries() if d["badge"] == "danger"]
+    for d in breaches:
+        d["over_by"] = d["turnaround_min"] - int(takt_time.TAKT_TIME_MINUTES)
+    new = [d for d in breaches if not d["exception_note"]]
+    coded = [d for d in breaches if d["exception_note"]]
+    by_reason = {}
+    for d in coded:
+        by_reason[d["exception_note"]] = by_reason.get(d["exception_note"], 0) + 1
+    by_reason = sorted(by_reason.items(), key=lambda item: item[1], reverse=True)
+    return dict(new=new, coded=coded, by_reason=by_reason, total=len(breaches))
+
+
+def report_summary():
+    finished = [d["turnaround_min"] for d in list_deliveries()
+                if d["turnaround_min"] is not None]
+    return takt_time.summarise_cycles(finished)
+
+
+def compliance_by_day():
+    rows = query_all("""
+        SELECT DATE(gate_in_at) AS day, COUNT(*) AS cycles,
+               SUM(TIMESTAMPDIFF(MINUTE, gate_in_at, gate_out_at) <= %s) AS within_takt
+        FROM deliveries
+        WHERE gate_out_at IS NOT NULL
+        GROUP BY DATE(gate_in_at)
+        ORDER BY day
+    """, (takt_time.TAKT_TIME_MINUTES,))
+    return [dict(label=r["day"].strftime("%d %b"),
+                 pct=round(float(r["within_takt"]) / r["cycles"] * 100, 1))
+            for r in rows]
+
+
+# Class 5 slide 46 (restock list) and slide 31 (GROUP BY)
+
+REASON_CODES = [
+    "Dock not ready",
+    "Waiting for paperwork",
+    "Loading delay at HPC",
+    "Carrier arrived late",
+    "Vehicle not ready",
+    "Other",
+]
+
+
+def breach_alerts():
+    breaches = [d for d in list_deliveries() if d["badge"] == "danger"]
+    for d in breaches:
+        d["over_by"] = d["turnaround_min"] - int(takt_time.TAKT_TIME_MINUTES)
+    new = [d for d in breaches if not d["exception_note"]]
+    coded = [d for d in breaches if d["exception_note"]]
+    by_reason = {}
+    for d in coded:
+        by_reason[d["exception_note"]] = by_reason.get(d["exception_note"], 0) + 1
+    by_reason = sorted(by_reason.items(), key=lambda item: item[1], reverse=True)
+    return dict(new=new, coded=coded, by_reason=by_reason, total=len(breaches))
+
+
+def report_summary():
+    finished = [d["turnaround_min"] for d in list_deliveries()
+                if d["turnaround_min"] is not None]
+    return takt_time.summarise_cycles(finished)
+
+
+def compliance_by_day():
+    rows = query_all("""
+        SELECT DATE(gate_in_at) AS day, COUNT(*) AS cycles,
+               SUM(TIMESTAMPDIFF(MINUTE, gate_in_at, gate_out_at) <= %s) AS within_takt
+        FROM deliveries
+        WHERE gate_out_at IS NOT NULL
+        GROUP BY DATE(gate_in_at)
+        ORDER BY day
+    """, (takt_time.TAKT_TIME_MINUTES,))
+    return [dict(label=r["day"].strftime("%d %b"),
+                 pct=round(float(r["within_takt"]) / r["cycles"] * 100, 1))
+            for r in rows]
