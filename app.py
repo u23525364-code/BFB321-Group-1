@@ -158,7 +158,7 @@ def login():
                 and password == app.config["DEMO_PASSWORD"]):
             session.clear()
             session["user"] = username
-                        session.permanent = request.form.get("remember") == "on"
+            session.permanent = request.form.get("remember") == "on"
             flash(f"Signed in as {username}.", "success")
             return redirect(url_for("index"))
         flash("Incorrect username or password.", "error")
