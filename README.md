@@ -3,7 +3,7 @@
 - Uwen du Plessis u22631373
 - Kadie Mc Intosh u23525364
 - Luka Wood u24591344 
- u24591344-cyber (commits before 22 Nov appear as bfb321 due to a laptop Git setting)
+ u24591344-cyber (some commits may show as bfb321)
 - Dean Zartmann u24595773
 
 HPC delivery takt-time dashboard. It monitors every driver delivery cycle against HPC's
