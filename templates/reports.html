@@ -250,14 +250,16 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="../static/js/dashboard.js"></script>
+  <script id="chartDays" type="application/json">{{ days | tojson }}</script>
   <script>
+   const days = JSON.parse(document.getElementById('chartDays').textContent);
     new Chart(document.getElementById('complianceChart'), {
       type: 'bar',
       data: {
-                labels: {{ days | map(attribute='label') | list | tojson }},
+        labels: days.map(d => d.label),
         datasets: [{
           label: 'Takt compliance',
-          data: {{ days | map(attribute='pct') | list | tojson }},
+          data: days.map(d => d.pct),
           backgroundColor: cssVar('--chart-1'),
           borderRadius: 4,
           maxBarThickness: 36
