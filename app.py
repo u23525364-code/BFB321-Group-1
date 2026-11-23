@@ -4,7 +4,7 @@
 import logging
 import os
 from flask import (Flask, flash, g, jsonify, redirect, render_template,
-                   request, url_for)
+                   request, session, url_for)
 
 
 import db
@@ -140,9 +140,35 @@ def capacity():
     return render_template("capacity.html", values=values, result=result,
                            errors=errors)
 
-@app.route("/login")
+@app.before_request
+def require_login():
+    """Every page needs a signed-in user, except the login page, static files and the API."""
+    if request.endpoint in ("login", "static") or request.path.startswith("/api/"):
+        return None
+    if not session.get("user"):
+        return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if (username == app.config["DEMO_USER"]
+                and password == app.config["DEMO_PASSWORD"]):
+            session.clear()
+            session["user"] = username
+            flash(f"Signed in as {username}.", "success")
+            return redirect(url_for("index"))
+        flash("Incorrect username or password.", "error")
     return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been signed out.", "success")
+    return redirect(url_for("login"))
 
 #Lecture Slides Class 4 pg 7
 if __name__ == "__main__":
