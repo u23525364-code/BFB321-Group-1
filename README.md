@@ -92,3 +92,22 @@ project.
   invalid field. Validation runs in the browser through `static/js/dashboard.js`.
 - **Accessibility:** skip link, labelled form controls, `aria-sort` on sortable columns,
   labelled progress bars and charts.
+
+## JSON API
+
+The API is a Flask Blueprint in `api.py` (all paths start with `/api`). It returns JSON,
+uses the same `services.py` functions as the web pages, and does not need a login.
+Full documentation with request/response examples: [docs/API.md](docs/API.md).
+
+| Method | Path | Purpose | Success | Errors |
+|---|---|---|---|---|
+| GET | `/api/kpis` | Takt KPIs: deliveries, average turnaround, compliance %, breaches | 200 | — |
+| GET | `/api/deliveries` | List deliveries · `?page=1&size=20` · filters `?q=TRK-02&carrier=2&status=Breached` | 200 | 400 |
+| GET | `/api/deliveries/<id>` | One delivery | 200 | 404 |
+| PATCH | `/api/deliveries/<id>` | Log an exception note · body `{"exception_note": "Dock not ready"}` | 200 | 400, 404 |
+| POST | `/api/scan-events` | Record an RFID scan · body `{"truck_code": "TRK-02", "location": "GATE-IN", "reader_id": "hpc-reader-01"}` | 201 | 400 |
+| GET | `/api/trucks` | Trucks with carrier names | 200 | — |
+
+Errors always look like `{"error": "message"}`. Invalid input gives 400, unknown records 404,
+and unexpected failures 500 (details are written to `logs/app.log`, never shown to the user).
+Integration tests: `tests/test_api.py`.
