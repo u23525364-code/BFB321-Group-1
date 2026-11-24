@@ -14,7 +14,7 @@ Drivers capture nothing: all data comes from the RFID scans.
 | Name | Student number | GitHub username | Main tasks |
 |---|---|---|---|
 | Kadie Mc Intosh | u23525364 | `u23525364-code` | Database (schema, seed, init_db, db.py), services layer, Live, Gate log, Alerts and Home pages, login |
-| Luka Wood | u24591344 | `u24591344-cyber` (some commits show the author name `bfb321`, same account) | Capacity model tests, `config.py`, Reports page (compliance by carrier/truck), ERD, README |
+| Luka Wood | u24591344 | `u24591344-cyber` (some commits show the author name `bfb321`, same account) | Capacity model and tests, `config.py`, Reports page (compliance by carrier/truck), ERD, README |
 | Dean Zartmann | u24595773 | `u24595773` | Takt-time model and tests, JSON API (Blueprint), error handling and logging, Capacity page, API tests and documentation |
 | Uwen du Plessis | u22631373 | `u22631373` | Frontend restructure and theming (semester project), TODO: final-project task |
 
@@ -88,7 +88,7 @@ Five tables in third normal form, with primary and foreign keys, UNIQUE and CHEC
 Indexes: `idx_scans_truck_time (truck_id, scanned_at)`, `idx_deliveries_status (status)`,
 `idx_deliveries_truck_time (truck_id, gate_in_at)`.
 
-[Entity relationship diagram](docs/erd.png)
+![Entity relationship diagram](docs/erd.png)
 
 *Figure 1: ERD (MySQL Workbench). The editable model is in `docs/erd.mwb`.*
 
@@ -153,6 +153,7 @@ Open **http://127.0.0.1:5000** and sign in.
 ## Demo login
 
 | Username | Password |
+|---|---|
 | `manager` | `takt2026` |
 
 All pages need a signed-in user. The JSON API does not, so it can be tested directly.
