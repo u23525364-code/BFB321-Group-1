@@ -221,20 +221,17 @@
                 <a href="{{ url_for('alerts') }}" class="btn btn-sm btn-outline-secondary">View all</a>
               </header>
               <div class="list-group list-group-flush">
+                {% for d in stats.breaches[:3] %}
                 <div class="list-group-item d-flex gap-3">
                   <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
                   <div class="feed-body">
-                    <p class="feed-title">Driver A exceeded takt by 11 min</p>
-                    <div class="feed-meta">12:51 · Dealership 1</div>
+                    <p class="feed-title">{{ d.delivery_code }} · {{ d.truck_code }} exceeded takt by {{ d.turnaround_min - 90 }} min</p>
+                    <div class="feed-meta">{{ d.gate_in_at.strftime('%d %b %H:%M') }} · {{ d.carrier }} · {{ d.dock or 'No dock' }}</div>
                   </div>
                 </div>
-                <div class="list-group-item d-flex gap-3">
-                  <span class="feed-icon"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
-                  <div class="feed-body">
-                    <p class="feed-title">Driver B exceeded takt by 4 min</p>
-                    <div class="feed-meta">11:20 · Dealership 4</div>
-                  </div>
-                </div>
+                {% else %}
+                <div class="list-group-item">No breaches recorded.</div>
+                {% endfor %}
               </div>
             </section>
           </div>
@@ -278,8 +275,7 @@
 
         <div class="design-note" role="note">
           <i class="bi bi-info-circle" aria-hidden="true"></i>
-          <p class="mb-0">Driver C is shown idle because HPC has three drivers and two trucks. Making that visible shows where current capacity constraints sit.</p>
-        </div>
+Each visit's bar shows the share of the 90-minute takt used: green under 72 min, amber 72–90, red over 90.</div>
       </main>
     </div>
   </div>
