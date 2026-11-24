@@ -247,5 +247,31 @@ Integration tests: `tests/test_api.py`.
 
 ## Screenshots
 
-TODO: add screenshots of Home, Live, Alerts, Reports, Capacity and Gate log in `docs/screenshots/`
-and link them here, e.g. `![Capacity page](docs/screenshots/capacity.png)`.
+Screenshots from the running application with the HPC sample data (after `python init_db.py --reset`).
+
+![Login page](docs/screenshots/login.png)
+*Figure 2: Login. All pages require a signed-in user (demo login above).*
+
+![Home page](docs/screenshots/home.png)
+*Figure 3: Home. Deliveries, takt compliance, breaches and trucks on site, calculated from the RFID data by the takt model.*
+
+![Live deliveries](docs/screenshots/live.png)
+*Figure 4: Live deliveries. Every truck visit with its turnaround and takt status, with search and carrier filter.*
+
+![Gate log](docs/screenshots/gatelog.png)
+*Figure 5: Gate log. Latest RFID scans and the form that records a scan (create flow).*
+
+![Breach alerts](docs/screenshots/alerts.png)
+*Figure 6: Breach alerts. Visits over 90 minutes, each waiting for a reason code (update flow).*
+
+![Reports](docs/screenshots/reports.png)
+*Figure 7: Reports. Daily compliance and takt compliance by carrier and by truck.*
+
+![Capacity within limit](docs/screenshots/capacity.png)
+*Figure 8: Capacity. The BYD scenario run through the capacity model: within capacity at a 30% uplift.*
+
+![Capacity over limit](docs/screenshots/capacity-over.png)
+*Figure 9: Capacity. At a 70% uplift the model shows a fourth driver is needed.*
+
+![API example](docs/screenshots/api-kpis.png)
+*Figure 10: JSON API. `GET /api/kpis` returns the same KPIs as the Home page.*
