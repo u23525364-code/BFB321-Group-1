@@ -31,11 +31,11 @@ Drivers capture nothing: all data comes from the RFID scans.
 | Update flow: reason code on a breach | `/deliveries/<id>/exception`, Alerts page | Kadie |
 | Login and logout | `app.py`, `templates/login.html` | Kadie |
 | Settings per environment | `config.py`, `.env.example` | Luka |
-| Reports: compliance by carrier and truck | `services.compliance_by`, `templates/reports.html` | Luka |
+| Reports: compliance by carrier and truck | `services.compliance_by`, `templates/reports.html` | Luka, Uwen (html) |
 | ERD | `docs/erd.png`, `docs/erd.mwb` | Luka |
 | JSON API (6 endpoints) | `api.py`, `docs/API.md` | Dean |
-| Error handlers and logging | `app.py`, `templates/error.html` | Dean |
-| Capacity page (model-driven scenario) | `services.py`, `templates/capacity.html` | Dean |
+| Error handlers and logging | `app.py`, `templates/error.html` | Dean, Uwen (html) |
+| Capacity page (model-driven scenario) | `services.py`, `templates/capacity.html` | Dean, Uwen (html) |
 | API integration tests | `tests/test_api.py` | Dean |
 | README | `README.md` | Luka |
 
