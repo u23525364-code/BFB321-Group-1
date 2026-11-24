@@ -16,6 +16,23 @@ if (window.Chart) {
   Chart.defaults.plugins.legend.labels.usePointStyle = true;
 }
 
+// Current day, time and greeting in the top bar, e.g. "Mon 14:32" and "Good afternoon".
+// Refreshed every 30 seconds so the clock stays current.
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const shortDay = now.toLocaleDateString('en-GB', { weekday: 'short' });
+  const longDay = now.toLocaleDateString('en-GB', { weekday: 'long' });
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+  document.querySelectorAll('.js-clock').forEach(el => { el.textContent = `${shortDay} ${time}`; });
+  document.querySelectorAll('.js-day').forEach(el => { el.textContent = longDay; });
+  document.querySelectorAll('.js-greeting').forEach(el => { el.textContent = greeting; });
+}
+updateClock();
+setInterval(updateClock, 30000);
+
 // Column sorting. Any <th class="sortable-header"> gets a button inside it, so
 // sorting works by keyboard as well as mouse. Click toggles ascending / descending.
 // Compares cell text, treating numbers numerically ("9 min" < "10 min").
