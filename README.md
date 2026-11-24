@@ -23,7 +23,7 @@ Drivers capture nothing: all data comes from the RFID scans.
 | Area | Files | Who |
 |---|---|---|
 | Supply chain model: takt time | `models/takt_time.py`, `tests/test_takt_time.py` | Dean |
-| Supply chain model: capacity | `models/capacity.py`, `tests/test_capacity.py` | Luka (tests), team |
+| Supply chain model: capacity | `models/capacity.py`, `tests/test_capacity.py` | Luka |
 | Frontend pages and theme | `templates/`, `static/` | Kadie, Uwen |
 | Database: schema, seed data, build script, connection | `schema.sql`, `seed.sql`, `init_db.py`, `db.py` | Kadie |
 | Services (SQL and business rules) | `services.py` | Kadie, plus Luka (reports) and Dean (capacity, trucks) |
@@ -88,7 +88,7 @@ Five tables in third normal form, with primary and foreign keys, UNIQUE and CHEC
 Indexes: `idx_scans_truck_time (truck_id, scanned_at)`, `idx_deliveries_status (status)`,
 `idx_deliveries_truck_time (truck_id, gate_in_at)`.
 
-![Entity relationship diagram](docs/erd.png)
+[Entity relationship diagram](docs/erd.png)
 
 *Figure 1: ERD (MySQL Workbench). The editable model is in `docs/erd.mwb`.*
 
@@ -153,7 +153,6 @@ Open **http://127.0.0.1:5000** and sign in.
 ## Demo login
 
 | Username | Password |
-|---|---|
 | `manager` | `takt2026` |
 
 All pages need a signed-in user. The JSON API does not, so it can be tested directly.
