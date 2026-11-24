@@ -223,8 +223,7 @@
 
 
         <div class="status-strip">
-          <div><strong>Last scan</strong> · 14:31 · HPC gate · Exit · TRK-002</div>
-          <div class="live-indicator d-inline-flex"><span class="live-dot" aria-hidden="true"></span>System status: receiving scan data normally</div>
+          <div><strong>Last scan</strong> · {% if last_scan %}{{ last_scan.scanned_at.strftime('%d %b %H:%M') }} · {{ last_scan.location }} · {{ last_scan.truck_code }}{% else %}none yet{% endif %}</div>          <div class="live-indicator d-inline-flex"><span class="live-dot" aria-hidden="true"></span>System status: receiving scan data normally</div>
         </div>
 
         <div class="design-note" role="note">
