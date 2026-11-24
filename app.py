@@ -74,7 +74,9 @@ def server_error(error):
 @app.route("/")
 def index():
     stats = services.dashboard_stats()
-    return render_template("home.html", stats=stats)
+    latest = services.list_scan_events(1)
+    return render_template("home.html", stats=stats,
+                           last_scan=latest[0] if latest else None)
 
 @app.route("/live")
 def live():
