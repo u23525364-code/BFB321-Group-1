@@ -14,9 +14,9 @@ Drivers capture nothing: all data comes from the RFID scans.
 | Name | Student number | GitHub username | Main tasks |
 |---|---|---|---|
 | Kadie Mc Intosh | u23525364 | `u23525364-code` | Database (schema, seed, init_db, db.py), services layer, Live, Gate log, Alerts and Home pages, login |
-| Luka Wood | u24591344 | `u24591344-cyber` (some commits show the author name `bfb321`, same account) | Capacity model and tests, `config.py`, Reports page (compliance by carrier/truck), ERD, README |
+| Luka Wood | u24591344 | `u24591344-cyber` (some commits show the author name `bfb321`, same account) | Capacity model and tests, `config.py`, Reports page (compliance by carrier/truck), ERD, README screenshots |
 | Dean Zartmann | u24595773 | `u24595773` | Takt-time model and tests, JSON API (Blueprint), error handling and logging, Capacity page, API tests and documentation |
-| Uwen du Plessis | u22631373 | `u22631373` | Frontend restructure and theming (semester project), TODO: final-project task |
+| Uwen du Plessis | u22631373 | `u22631373` |Frontend structure, Halfway theme and HTML formatting (semester project); live day, time and greeting in the top bar of every page |
 
 ## Task allocation
 
