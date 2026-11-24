@@ -221,7 +221,7 @@ models/             Supply chain model: takt_time.py, capacity.py
 tests/              pytest: model unit tests, API integration tests
 templates/          Jinja2 pages (+ error.html)
 static/             CSS, JavaScript, images
-docs/               ERD (erd.png, erd.mwb), API documentation (API.md)
+docs/               ERD (erd.png, erd.mwb), API documentation (API.md), screenshots/
 requirements.txt    Python packages
 .env.example        Settings template (copy to .env)
 ```
@@ -247,7 +247,7 @@ Integration tests: `tests/test_api.py`.
 
 ## Screenshots
 
-Screenshots from the running application with the HPC sample data (after `python init_db.py --reset`).
+Screenshots from the running application with the HPC sample data .
 
 ![Login page](docs/screenshots/login.png)
 *Figure 2: Login. All pages require a signed-in user (demo login above).*
